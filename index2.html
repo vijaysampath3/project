@@ -1,0 +1,3211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Crop Recommendation System</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+        /* Header */
+        header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 1rem 0;
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .logo {
+            font-size: 1.8rem;
+            font-weight: bold;
+            color: #2E8B57;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-links {
+            display: flex;
+            list-style: none;
+            gap: 2rem;
+        }
+        .nav-links a {
+            text-decoration: none;
+            color: #333;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+        .nav-links a:hover {
+            color: #2E8B57;
+        }
+        .nav-links a.active {
+            color: #2E8B57;
+            font-weight: 700;
+        }
+        .language-toggle {
+            background: #2E8B57;
+            color: white;
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .language-toggle:hover {
+            background: #1F6B4A;
+        }
+        .language-toggle:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        .translation-loading {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #ffffff;
+            border-radius: 50%;
+            border-top-color: transparent;
+            animation: spin 1s ease-in-out infinite;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        /* Section Management */
+        .section {
+            display: none;
+        }
+        .section.active {
+            display: block;
+        }
+        /* Home Section */
+        .hero {
+            text-align: center;
+            padding: 4rem 0;
+            color: white;
+            background: linear-gradient(135deg, #2E8B57, #90EE90);
+        }
+        .hero h1 {
+            font-size: 3.5rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+        .hero p {
+            font-size: 1.3rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .cta-button {
+            display: inline-block;
+            background: #90EE90;
+            color: white;
+            padding: 1rem 2rem;
+            text-decoration: none;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(144, 238, 144, 0.3);
+            border: 2px solid transparent;
+            cursor: pointer;
+        }
+        .cta-button:hover {
+            background: white;
+            color: #7FDD7F;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(144, 238, 144, 0.4);
+        }
+        .cta-button.clicked {
+            background: white;
+            color: #2E8B57;
+            border-color: #2E8B57;
+        }
+        /* Features Section */
+        .features {
+            background: white;
+            padding: 4rem 0;
+        }
+        .features h2 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 3rem;
+            color: #2E8B57;
+        }
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .feature-card {
+            background: #F5F5DC;
+            padding: 2rem;
+            border-radius: 15px;
+            text-align: center;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            border: 1px solid rgba(46, 139, 87, 0.1);
+        }
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+        .feature-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            color: #2E8B57;
+        }
+        .feature-card h3 {
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            color: #8B4513;
+        }
+        /* Form Section */
+        .form-container {
+            background: white;
+            margin: 2rem 0;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .form-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #2E8B57;
+        }
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #2E8B57;
+        }
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 1rem;
+            border: 2px solid #e1e8ed;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+        .form-group input:focus,
+        .form-group select:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #2E8B57;
+        }
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+        .location-section {
+            background: #F5F5DC;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 1.5rem;
+        }
+        .location-section h3 {
+            margin-bottom: 1rem;
+            color: #2E8B57;
+        }
+        .gps-button {
+            background: #2E8B57;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-top: 0.5rem;
+            transition: background 0.3s;
+        }
+        .gps-button:hover {
+            background: #1F6B4A;
+        }
+        .gps-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+        }
+        .coordinates-display {
+            background: #e8f5e8;
+            padding: 1rem;
+            border-radius: 8px;
+            margin-top: 1rem;
+            display: none;
+        }
+        .submit-button {
+            background: #90EE90;
+            color: white;
+            border: none;
+            padding: 1.2rem 3rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            width: 100%;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(144, 238, 144, 0.4);
+        }
+        .submit-button:hover {
+            background: #7FDD7F;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(144, 238, 144, 0.5);
+        }
+        .submit-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .loading {
+            display: none;
+            text-align: center;
+            margin-top: 1rem;
+        }
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #2E8B57;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 1rem;
+        }
+        .back-button {
+            background: #2E8B57;
+            color: white;
+            border: none;
+            padding: 0.8rem 1.5rem;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1rem;
+            margin-bottom: 1.5rem;
+            transition: background 0.3s;
+        }
+        .back-button:hover {
+            background: #1F6B4A;
+        }
+        /* Results Section */
+        .results-section {
+            background: white;
+            margin: 2rem 0;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        .results-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #2E8B57;
+        }
+        .location-info {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-radius: 10px;
+            margin-bottom: 2rem;
+            border-left: 4px solid #2E8B57;
+        }
+        .location-info h3 {
+            color: #2E8B57;
+            margin-bottom: 1rem;
+        }
+        .location-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+        }
+        .location-item {
+            background: white;
+            padding: 1rem;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .location-item strong {
+            color: #2E8B57;
+        }
+        /* Crop Recommendations */
+        .crop-recommendations {
+            margin-top: 2rem;
+        }
+        .crop-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-top: 2rem;
+        }
+        .crop-card {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            border: 3px solid transparent;
+        }
+        .crop-card:hover {
+            transform: translateY(-5px);
+        }
+        .crop-card.recommended {
+            border-color: #27ae60;
+            background: linear-gradient(135deg, #e8f5e8 0%, #f0f8f0 100%);
+        }
+        .crop-card.good {
+            border-color: #f39c12;
+            background: linear-gradient(135deg, #fef9e7 0%, #fdf6e3 100%);
+        }
+        .crop-card.moderate {
+            border-color: #e74c3c;
+            background: linear-gradient(135deg, #fdf2f2 0%, #fce4e4 100%);
+        }
+        .crop-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+        .crop-icon {
+            font-size: 2.5rem;
+            margin-right: 1rem;
+        }
+        .crop-name {
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        .crop-score {
+            background: #667eea;
+            color: white;
+            padding: 0.3rem 0.8rem;
+            border-radius: 20px;
+            font-size: 0.9rem;
+            font-weight: bold;
+            margin-left: auto;
+        }
+        .crop-details {
+            margin-top: 1rem;
+        }
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 0.5rem;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid #e1e8ed;
+        }
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+        .detail-label {
+            font-weight: 600;
+            color: #2c3e50;
+        }
+        .detail-value {
+            color: #666;
+        }
+        .crop-benefits {
+            margin-top: 1rem;
+            padding: 1rem;
+            background: rgba(102, 126, 234, 0.1);
+            border-radius: 8px;
+        }
+        .crop-benefits h4 {
+            color: #2c3e50;
+            margin-bottom: 0.5rem;
+        }
+        .crop-benefits ul {
+            list-style: none;
+            padding-left: 0;
+        }
+        .crop-benefits li {
+            padding: 0.2rem 0;
+            color: #666;
+        }
+        .crop-benefits li:before {
+            content: "✓ ";
+            color: #27ae60;
+            font-weight: bold;
+        }
+        /* Action Buttons */
+        .action-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        .action-button {
+            padding: 1rem 2rem;
+            border: none;
+            border-radius: 50px;
+            font-size: 1rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            display: inline-block;
+            text-align: center;
+        }
+        .action-button.primary {
+            background: #27ae60;
+            color: white;
+            box-shadow: 0 4px 15px rgba(39, 174, 96, 0.3);
+        }
+        .action-button.primary:hover {
+            background: #229954;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(39, 174, 96, 0.4);
+        }
+        .action-button.secondary {
+            background: #2E8B57;
+            color: white;
+            box-shadow: 0 4px 15px rgba(46, 139, 87, 0.3);
+        }
+        .action-button.secondary:hover {
+            background: #1F6B4A;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 139, 87, 0.4);
+        }
+        .action-button.outline {
+            background: transparent;
+            color: #2E8B57;
+            border: 2px solid #2E8B57;
+        }
+        .action-button.outline:hover {
+            background: #2E8B57;
+            color: white;
+        }
+        /* Tips Section */
+        .tips-section {
+            background: #f8f9fa;
+            padding: 2rem;
+            border-radius: 15px;
+            margin-top: 2rem;
+        }
+        .tips-section h3 {
+            color: #2E8B57;
+            margin-bottom: 1rem;
+        }
+        .tips-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+        .tip-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        }
+        .tip-card h4 {
+            color: #2E8B57;
+            margin-bottom: 0.5rem;
+        }
+        
+        /* Weather Section */
+        .weather-container {
+            background: white;
+            margin: 2rem 0;
+            padding: 3rem;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            max-width: 1200px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .weather-title {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 2rem;
+            color: #2E8B57;
+        }
+        .weather-content {
+            text-align: center;
+        }
+        .weather-button {
+            background: #2E8B57;
+            color: white;
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 50px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s;
+            box-shadow: 0 4px 15px rgba(46, 139, 87, 0.3);
+            margin-top: 1rem;
+        }
+        .weather-button:hover {
+            background: #1F6B4A;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(46, 139, 87, 0.4);
+        }
+        .weather-button:disabled {
+            background: #95a5a6;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        .weather-forecast {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-top: 2rem;
+        }
+        .weather-day {
+            background: #f8f9fa;
+            border-radius: 15px;
+            padding: 1.5rem;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+            border: 2px solid #e1e8ed;
+        }
+        .weather-day:hover {
+            transform: translateY(-5px);
+            border-color: #2E8B57;
+        }
+        .weather-date {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #2E8B57;
+            margin-bottom: 1rem;
+        }
+        .weather-icon {
+            font-size: 3rem;
+            margin: 1rem 0;
+        }
+        .weather-temp {
+            font-size: 1.5rem;
+            font-weight: bold;
+            margin-bottom: 0.5rem;
+        }
+        .weather-desc {
+            color: #666;
+            margin-bottom: 1rem;
+        }
+        .weather-details {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid #e1e8ed;
+        }
+        .weather-detail {
+            text-align: center;
+        }
+        .weather-detail-label {
+            font-size: 0.9rem;
+            color: #666;
+        }
+        .weather-detail-value {
+            font-weight: bold;
+            color: #2E8B57;
+        }
+        
+        /* Footer */
+        footer {
+            background: #2E8B57;
+            color: white;
+            text-align: center;
+            padding: 2rem 0;
+        }
+        
+        /* Enhanced Chatbot Styles */
+        .chatbot-container {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            z-index: 1000;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .chatbot-button {
+            width: 65px;
+            height: 65px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2E8B57, #90EE90);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 15px rgba(46, 139, 87, 0.4);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 4px 15px rgba(46, 139, 87, 0.4);
+            }
+            50% {
+                box-shadow: 0 4px 25px rgba(46, 139, 87, 0.6);
+            }
+            100% {
+                box-shadow: 0 4px 15px rgba(46, 139, 87, 0.4);
+            }
+        }
+        
+        .chatbot-button:hover {
+            transform: scale(1.1);
+            box-shadow: 0 6px 20px rgba(46, 139, 87, 0.6);
+        }
+        
+        .chatbot-button:active {
+            transform: scale(0.95);
+        }
+        
+        .chatbot-button::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 0;
+            height: 0;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            transform: translate(-50%, -50%);
+            transition: width 0.6s, height 0.6s;
+        }
+        
+        .chatbot-button:active::after {
+            width: 300px;
+            height: 300px;
+        }
+        
+        .chatbot-window {
+            position: absolute;
+            bottom: 80px;
+            right: 0;
+            width: 400px;
+            height: 550px;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 15px 40px rgba(0, 0, 0, 0.25);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            opacity: 0;
+            transform: translateY(20px) scale(0.95);
+            visibility: hidden;
+            transition: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+        
+        .chatbot-window.active {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            visibility: visible;
+        }
+        
+        .chatbot-header {
+            background: linear-gradient(135deg, #2E8B57, #90EE90);
+            color: white;
+            padding: 18px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        
+        .chatbot-header h3 {
+            margin: 0;
+            font-size: 18px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .chatbot-status {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            font-size: 12px;
+            opacity: 0.9;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            background: #4ade80;
+            border-radius: 50%;
+            animation: blink 2s infinite;
+        }
+        
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        
+        .chatbot-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 20px;
+            cursor: pointer;
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s;
+        }
+        
+        .chatbot-close:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: rotate(90deg);
+        }
+        
+        .chatbot-messages {
+            flex: 1;
+            padding: 20px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            background: #f8f9fa;
+        }
+        
+        .message {
+            max-width: 85%;
+            padding: 14px 18px;
+            border-radius: 18px;
+            line-height: 1.5;
+            font-size: 14px;
+            position: relative;
+            animation: messageSlide 0.3s ease;
+            word-wrap: break-word;
+        }
+        
+        @keyframes messageSlide {
+            from { 
+                opacity: 0; 
+                transform: translateY(10px); 
+            }
+            to { 
+                opacity: 1; 
+                transform: translateY(0); 
+            }
+        }
+        
+        .bot-message {
+            background: white;
+            color: #333;
+            align-self: flex-start;
+            border-bottom-left-radius: 4px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .user-message {
+            background: linear-gradient(135deg, #2E8B57, #90EE90);
+            color: white;
+            align-self: flex-end;
+            border-bottom-right-radius: 4px;
+            box-shadow: 0 2px 8px rgba(46, 139, 87, 0.3);
+        }
+        
+        .message-time {
+            font-size: 11px;
+            opacity: 0.7;
+            margin-top: 5px;
+            text-align: right;
+        }
+        
+        .bot-message .message-time {
+            text-align: left;
+        }
+        
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            margin-top: 8px;
+        }
+        
+        .quick-action {
+            background: rgba(46, 139, 87, 0.1);
+            color: #2E8B57;
+            border: 1px solid rgba(46, 139, 87, 0.2);
+            padding: 6px 12px;
+            border-radius: 15px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            white-space: nowrap;
+        }
+        
+        .quick-action:hover {
+            background: rgba(46, 139, 87, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .chatbot-input-container {
+            padding: 15px;
+            background: white;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .chatbot-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 25px;
+            font-size: 14px;
+            outline: none;
+            transition: border-color 0.3s;
+            resize: none;
+            font-family: inherit;
+        }
+        
+        .chatbot-input:focus {
+            border-color: #2E8B57;
+        }
+        
+        .chatbot-send {
+            position: absolute;
+            right: 25px;
+            bottom: 25px;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #2E8B57, #90EE90);
+            color: white;
+            border: none;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 8px rgba(46, 139, 87, 0.3);
+        }
+        
+        .chatbot-send:hover {
+            transform: scale(1.1);
+            box-shadow: 0 4px 12px rgba(46, 139, 87, 0.4);
+        }
+        
+        .chatbot-send:active {
+            transform: scale(0.95);
+        }
+        
+        .chatbot-send:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .chatbot-typing {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            padding: 12px 16px;
+            background: white;
+            border-radius: 18px;
+            border-bottom-left-radius: 4px;
+            max-width: 80px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+        }
+        
+        .chatbot-typing span {
+            height: 8px;
+            width: 8px;
+            border-radius: 50%;
+            background: #999;
+            display: inline-block;
+            animation: typing 1.4s infinite;
+        }
+        
+        .chatbot-typing span:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+        
+        .chatbot-typing span:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+            }
+            30% {
+                transform: translateY(-10px);
+            }
+        }
+        
+        .chatbot-suggestions {
+            padding: 15px;
+            background: #f8f9fa;
+            border-top: 1px solid #e5e7eb;
+        }
+        
+        .suggestion-title {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 8px;
+            font-weight: 600;
+        }
+        
+        .suggestion-chips {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+        }
+        
+        .suggestion-chip {
+            background: white;
+            color: #2E8B57;
+            border: 1px solid #e5e7eb;
+            padding: 8px 14px;
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .suggestion-chip:hover {
+            background: #2E8B57;
+            color: white;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 6px rgba(46, 139, 87, 0.3);
+        }
+        
+        /* Mobile Responsive */
+        @media (max-width: 768px) {
+            .nav-links {
+                display: none;
+            }
+            .hero h1 {
+                font-size: 2.5rem;
+            }
+            .hero p {
+                font-size: 1.1rem;
+            }
+            .features-grid,
+            .crop-grid,
+            .weather-forecast {
+                grid-template-columns: 1fr;
+            }
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+            .results-section,
+            .form-container,
+            .weather-container {
+                margin: 1rem 0;
+                padding: 2rem 1rem;
+            }
+            .results-title,
+            .form-title,
+            .weather-title {
+                font-size: 2rem;
+            }
+            .action-buttons {
+                flex-direction: column;
+                align-items: center;
+            }
+            .action-button {
+                width: 100%;
+                max-width: 300px;
+            }
+            
+            /* Chatbot mobile responsive */
+            .chatbot-container {
+                bottom: 20px;
+                right: 20px;
+            }
+            
+            .chatbot-window {
+                width: calc(100vw - 40px);
+                height: 70vh;
+                right: -20px;
+                max-width: 400px;
+            }
+            
+            .chatbot-button {
+                width: 60px;
+                height: 60px;
+                font-size: 24px;
+            }
+        }
+        /* Language-specific styles */
+        .hindi {
+            font-family: 'Noto Sans Devanagari', 'Arial Unicode MS', sans-serif;
+        }
+        .telugu {
+            font-family: 'Noto Sans Telugu', 'Arial Unicode MS', sans-serif;
+        }
+        .hidden {
+            display: none;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <nav class="container">
+            <div class="logo">
+                <i class="fas fa-seedling"></i>
+                <span data-translate="logo">Smart Crop</span>
+            </div>
+            <ul class="nav-links">
+                <li><a href="javascript:void(0)" id="home-link" class="active" data-translate="nav_home">Home</a></li>
+                <li><a href="javascript:void(0)" id="form-link" data-translate="nav_recommendation">Get Recommendation</a></li>
+                <li><a href="javascript:void(0)" id="weather-link" data-translate="nav_weather">Weather</a></li>
+                <li><a href="#about" data-translate="nav_about">About</a></li>
+                <li><a href="#contact" data-translate="nav_contact">Contact</a></li>
+            </ul>
+            <button class="language-toggle" onclick="toggleLanguage()">
+                <span id="current-lang">हिंदी</span>
+                <span id="translation-loader" class="translation-loading hidden"></span>
+            </button>
+        </nav>
+    </header>
+    <main>
+        <div class="section active" id="home-section">
+            <section class="hero">
+                <div class="container">
+                    <h1 data-translate="hero_title">Smart Crop Recommendation System</h1>
+                    <p data-translate="hero_subtitle">Get personalized crop recommendations based on your soil type, weather conditions, and location. Maximize your yield with data-driven farming decisions.</p>
+                    <button class="cta-button" onclick="showForm(event)" data-translate="hero_cta">Get Started</button>
+                </div>
+            </section>
+            <section class="features" id="about">
+                <div class="container">
+                    <h2 data-translate="features_title">Why Choose Our System?</h2>
+                    <div class="features-grid">
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-bullseye"></i>
+                            </div>
+                            <h3 data-translate="feature1_title">Precise Recommendations</h3>
+                            <p data-translate="feature1_desc">Get crop suggestions tailored to your specific soil and climate conditions.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-mobile-alt"></i>
+                            </div>
+                            <h3 data-translate="feature2_title">Mobile Friendly</h3>
+                            <p data-translate="feature2_desc">Access recommendations on any device, anywhere in your field.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-map-marker-alt"></i>
+                            </div>
+                            <h3 data-translate="feature3_title">Location Based</h3>
+                            <p data-translate="feature3_desc">Automatic soil type detection using GPS coordinates for accurate results.</p>
+                        </div>
+                        <div class="feature-card">
+                            <div class="feature-icon">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <h3 data-translate="feature4_title">Data Driven</h3>
+                            <p data-translate="feature4_desc">Based on scientific research and agricultural databases.</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+        <div class="section" id="form-section">
+            <div class="container">
+                <div class="form-container">
+                    <button class="back-button" onclick="showHome()">
+                        <i class="fas fa-arrow-left"></i> <span data-translate="back_button">Back to Home</span>
+                    </button>
+                    <h1 class="form-title" data-translate="form_title">Crop Recommendation Form</h1>
+                    <form id="cropForm">
+                        <div class="location-section">
+                            <h3 data-translate="location_title">📍 Location Information</h3>
+                            <div class="form-group">
+                                <label for="location" data-translate="location_label">Location (City/District)</label>
+                                <input type="text" id="location" name="location" data-translate-placeholder="location_placeholder" placeholder="Enter your city or district" required>
+                            </div>
+                            <button type="button" class="gps-button" onclick="getCurrentLocation()" data-translate="gps_button">
+                                📍 Use GPS Location
+                            </button>
+                            <div class="coordinates-display" id="coordinatesDisplay">
+                                <p data-translate="coordinates_text">📍 Coordinates: <span id="coordinates"></span></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="soilType" data-translate="soil_type_label">Soil Type</label>
+                            <select id="soilType" name="soilType" required>
+                                <option value="" data-translate="soil_type_default">Select soil type</option>
+                                <option value="clay">Clay</option>
+                                <option value="sandy">Sandy</option>
+                                <option value="loam">Loam</option>
+                                <option value="sandy loam">Sandy Loam</option>
+                                <option value="black soil">Black Soil</option>
+                                <option value="loamy sand">Loamy Sand</option>
+                            </select>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phLevel" data-translate="ph_label">pH Level</label>
+                                <input type="number" id="phLevel" name="phLevel" min="1" max="14" step="0.1" data-translate-placeholder="ph_placeholder" placeholder="6.5" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="rainfall" data-translate="rainfall_label">Annual Rainfall (mm)</label>
+                                <input type="number" id="rainfall" name="rainfall" min="0" step="10" data-translate-placeholder="rainfall_placeholder" placeholder="1000" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="temperature" data-translate="temperature_label">Average Temperature (°C)</label>
+                                <input type="number" id="temperature" name="temperature" min="-10" max="50" step="1" data-translate-placeholder="temperature_placeholder" placeholder="25" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="season" data-translate="season_label">Planting Season</label>
+                                <select id="season" name="season" required>
+                                    <option value="" data-translate="season_default">Select season</option>
+                                    <option value="kharif">Kharif (Monsoon)</option>
+                                    <option value="rabi">Rabi (Winter)</option>
+                                    <option value="zaid">Zaid (Summer)</option>
+                                    <option value="both">Both Seasons</option>
+                                    <option value="annual">Annual</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="farmSize" data-translate="farm_size_label">Farm Size (acres)</label>
+                            <input type="number" id="farmSize" name="farmSize" min="0.1" step="0.1" data-translate-placeholder="farm_size_placeholder" placeholder="2.5" required>
+                        </div>
+                        <div class="form-group">
+                            <label for="irrigation" data-translate="irrigation_label">Irrigation Type</label>
+                            <select id="irrigation" name="irrigation" required>
+                                <option value="" data-translate="irrigation_default">Select irrigation type</option>
+                                <option value="rainfed">Rainfed</option>
+                                <option value="irrigated">Irrigated</option>
+                                <option value="drip">Drip Irrigation</option>
+                                <option value="sprinkler">Sprinkler Irrigation</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="budget" data-translate="budget_label">Budget Range (₹)</label>
+                            <select id="budget" name="budget" required>
+                                <option value="" data-translate="budget_default">Select budget range</option>
+                                <option value="low">Low (₹0-10,000)</option>
+                                <option value="medium">Medium (₹10,000-50,000)</option>
+                                <option value="high">High (₹50,000+)</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="experience" data-translate="experience_label">Farming Experience</label>
+                            <select id="experience" name="experience" required>
+                                <option value="" data-translate="experience_default">Select experience level</option>
+                                <option value="beginner">Beginner (0-2 years)</option>
+                                <option value="intermediate">Intermediate (2-10 years)</option>
+                                <option value="expert">Expert (10+ years)</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="submit-button" data-translate="submit_button">
+                            Get Crop Recommendations
+                        </button>
+                        <div class="loading" id="loading">
+                            <div class="spinner"></div>
+                            <p data-translate="loading_text">Analyzing your data and generating recommendations...</p>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        <div class="section" id="results-section">
+            <div class="container">
+                <div class="results-section">
+                    <h1 class="results-title" data-translate="results_title">Your Crop Recommendations</h1>
+                    <div class="location-info">
+                        <h3 data-translate="location_conditions">📍 Location & Conditions</h3>
+                        <div class="location-grid" id="locationGrid">
+                            </div>
+                    </div>
+                    <div class="crop-recommendations">
+                        <h2 data-translate="recommended_crops">🌾 Recommended Crops</h2>
+                        <div class="crop-grid" id="cropGrid">
+                            </div>
+                    </div>
+                    <div class="tips-section">
+                        <h3 data-translate="farming_tips">💡 Farming Tips</h3>
+                        <div class="tips-grid" id="tipsGrid">
+                            </div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-button primary" onclick="showForm()" data-translate="get_new_recommendation">Get New Recommendation</button>
+                        <button class="action-button secondary" onclick="downloadReport()" data-translate="download_report">Download Report</button>
+                        <button class="action-button outline" onclick="showHome()" data-translate="back_button">Back to Home</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="section" id="weather-section">
+            <div class="container">
+                <div class="weather-container">
+                    <button class="back-button" onclick="showHome()">
+                        <i class="fas fa-arrow-left"></i> <span data-translate="back_button">Back to Home</span>
+                    </button>
+                    <h1 class="weather-title" data-translate="weather_title">Weather Information</h1>
+                    <div class="weather-content">
+                        <h2 data-translate="weather_subtitle">Get 4-Day Weather Forecast Using GPS Location</h2>
+                        <button class="weather-button" onclick="getWeather()" data-translate="weather_button">Get Weather Forecast</button>
+                        <div id="weather-output"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+    <footer id="contact">
+        <div class="container">
+            <p data-translate="footer_text">&copy; 2024 Smart Crop Recommendation System. Helping farmers make better decisions.</p>
+        </div>
+    </footer>
+    <div class="chatbot-container">
+        <button class="chatbot-button" id="chatbotButton">
+            <i class="fas fa-comments"></i>
+        </button>
+        <div class="chatbot-window" id="chatbotWindow">
+            <div class="chatbot-header">
+                <div>
+                    <h3><i class="fas fa-seedling"></i> Smart Crop Assistant</h3>
+                    <div class="chatbot-status">
+                        <span class="status-dot"></span>
+                        <span>Online</span>
+                    </div>
+                </div>
+                <button class="chatbot-close" id="chatbotClose">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="chatbot-messages" id="chatbotMessages">
+                <div class="message bot-message">
+                    🌱 Hello! I'm your Smart Crop Assistant. I can help you with:
+                    <div class="quick-actions">
+                        <span class="quick-action">Crop recommendations</span>
+                        <span class="quick-action">Weather info</span>
+                        <span class="quick-action">Soil types</span>
+                        <span class="quick-action">Farming tips</span>
+                    </div>
+                    <div class="message-time">Just now</div>
+                </div>
+            </div>
+            <div class="chatbot-suggestions">
+                <div class="suggestion-title">Try asking:</div>
+                <div class="suggestion-chips">
+                    <div class="suggestion-chip" onclick="sendSuggestion('What crops grow in clay soil?')">What crops grow in clay soil?</div>
+                    <div class="suggestion-chip" onclick="sendSuggestion('Best crops for low rainfall')">Best crops for low rainfall</div>
+                    <div class="suggestion-chip" onclick="sendSuggestion('Kharif season crops')">Kharif season crops</div>
+                    <div class="suggestion-chip" onclick="sendSuggestion('How to improve soil fertility?')">How to improve soil fertility?</div>
+                </div>
+            </div>
+            <div class="chatbot-input-container">
+                <textarea 
+                    id="chatbotInput" 
+                    placeholder="Ask me anything about farming..." 
+                    rows="1"
+                    onkeypress="handleKeyPress(event)"
+                    oninput="autoResize(this)"></textarea>
+                <button id="chatbotSend" onclick="sendMessage()">
+                    <i class="fas fa-paper-plane"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+    <script>
+        // Crop Database from Excel
+        const cropDatabase = [
+            {
+                Crop_ID: 1,
+                Crop_Name: "Rice",
+                Season: "Kharif",
+                Soil_Type: "Clay",
+                Water_Requirement: "High",
+                NPK_Recommendation: "100-50-50",
+                Yield: 2500,
+                icon: "🌾",
+                benefits: {
+                    en: ["High yield potential", "Good market demand", "Staple food crop"],
+                    hi: ["उच्च उत्पादन क्षमता", "अच्छी बाजार मांग", "मुख्य खाद्य फसल"],
+                    te: ["అధిక దిగుబడి సామర్థ్యం", "మంచి మార్కెట్ డిమాండ్", "ప్రధాన ఆహార పంట"]
+                }
+            },
+            {
+                Crop_ID: 2,
+                Crop_Name: "Wheat",
+                Season: "Rabi",
+                Soil_Type: "Loam",
+                Water_Requirement: "Medium",
+                NPK_Recommendation: "120-60-40",
+                Yield: 2200,
+                icon: "🌾",
+                benefits: {
+                    en: ["High nutritional value", "Good storage life", "High market price"],
+                    hi: ["उच्च पोषण मूल्य", "अच्छा भंडारण जीवन", "उच्च बाजार मूल्य"],
+                    te: ["అధిక పోషక విలువ", "మంచి నిల్వ జీవితం", "అధిక మార్కెట్ ధర"]
+                }
+            },
+            {
+                Crop_ID: 3,
+                Crop_Name: "Maize",
+                Season: "Both",
+                Soil_Type: "Sandy Loam",
+                Water_Requirement: "Medium",
+                NPK_Recommendation: "90-40-30",
+                Yield: 2000,
+                icon: "🌽",
+                benefits: {
+                    en: ["Fast growing", "Multiple uses", "Good for animal feed"],
+                    hi: ["तेजी से बढ़ने वाला", "कई उपयोग", "पशु चारे के लिए अच्छा"],
+                    te: ["వేగంగా పెరిగే", "బహుళ ఉపయోగాలు", "పశువుల మేతకు మంచిది"]
+                }
+            },
+            {
+                Crop_ID: 4,
+                Crop_Name: "Cotton",
+                Season: "Kharif",
+                Soil_Type: "Black Soil",
+                Water_Requirement: "Medium",
+                NPK_Recommendation: "150-75-75",
+                Yield: 1800,
+                icon: "🌿",
+                benefits: {
+                    en: ["High fiber quality", "Good export potential", "Industrial use"],
+                    hi: ["उच्च फाइबर गुणवत्ता", "अच्छी निर्यात क्षमता", "औद्योगिक उपयोग"],
+                    te: ["అధిక ఫైబర్ నాణ్యత", "మంచి ఎగుమతి సామర్థ్యం", "పారిశ్రామిక ఉపయోగం"]
+                }
+            },
+            {
+                Crop_ID: 5,
+                Crop_Name: "Sugarcane",
+                Season: "Annual",
+                Soil_Type: "Loam",
+                Water_Requirement: "High",
+                NPK_Recommendation: "250-100-100",
+                Yield: 4000,
+                icon: "🎋",
+                benefits: {
+                    en: ["High sugar content", "Good for ethanol", "Long-term crop"],
+                    hi: ["उच्च चीनी सामग्री", "इथेनॉल के लिए अच्छा", "दीर्घकालिक फसल"],
+                    te: ["అధిక చక్కెర కంటెంట్", "ఇథనాల్ కోసం మంచిది", "దీర్ఘకాలిక పంట"]
+                }
+            },
+            {
+                Crop_ID: 6,
+                Crop_Name: "Bajra (Pearl Millet)",
+                Season: "Kharif",
+                Soil_Type: "Sandy",
+                Water_Requirement: "Low",
+                NPK_Recommendation: "60-30-20",
+                Yield: 1500,
+                icon: "🌾",
+                benefits: {
+                    en: ["Drought resistant", "Low water requirement", "Nutritious grain"],
+                    hi: ["सूखा प्रतिरोधी", "कम पानी की आवश्यकता", "पौष्टिक अनाज"],
+                    te: ["కరువు నిరోధక", "తక్కువ నీటి అవసరం", "పోషకాలు గల ధాన్యం"]
+                }
+            },
+            {
+                Crop_ID: 7,
+                Crop_Name: "Mustard",
+                Season: "Rabi",
+                Soil_Type: "Loam",
+                Water_Requirement: "Low",
+                NPK_Recommendation: "80-40-40",
+                Yield: 1300,
+                icon: "🌼",
+                benefits: {
+                    en: ["Oil crop", "Short duration", "Good rotation crop"],
+                    hi: ["तेल फसल", "कम अवधि", "अच्छी फसल चक्र"],
+                    te: ["నూనె పంట", "తక్కువ కాలం", "మంచి పంట మార్పు"]
+                }
+            },
+            {
+                Crop_ID: 8,
+                Crop_Name: "Groundnut",
+                Season: "Kharif",
+                Soil_Type: "Sandy Loam",
+                Water_Requirement: "Medium",
+                NPK_Recommendation: "30-60-40",
+                Yield: 1600,
+                icon: "🥜",
+                benefits: {
+                    en: ["Oil crop", "Nitrogen fixation", "Good for soil health"],
+                    hi: ["तेल फसल", "नाइट्रोजन स्थिरीकरण", "मिट्टी के स्वास्थ्य के लिए अच्छा"],
+                    te: ["నూనె పంట", "నైట్రోజన్ ఫిక్సేషన్", "నేల ఆరోగ్యానికి మంచిది"]
+                }
+            },
+            {
+                Crop_ID: 9,
+                Crop_Name: "Soybean",
+                Season: "Kharif",
+                Soil_Type: "Black Soil",
+                Water_Requirement: "Medium",
+                NPK_Recommendation: "20-60-40",
+                Yield: 1700,
+                icon: "🫘",
+                benefits: {
+                    en: ["High protein", "Nitrogen fixation", "Oil production"],
+                    hi: ["उच्च प्रोटीन", "नाइट्रोजन स्थिरीकरण", "तेल उत्पादन"],
+                    te: ["అధిక ప్రోటీన్", "నైట్రోజన్ ఫిక్సేషన్", "నూనె ఉత్పత్తి"]
+                }
+            },
+            {
+                Crop_ID: 10,
+                Crop_Name: "Barley",
+                Season: "Rabi",
+                Soil_Type: "Loam",
+                Water_Requirement: "Low",
+                NPK_Recommendation: "80-40-20",
+                Yield: 1400,
+                icon: "🌾",
+                benefits: {
+                    en: ["Drought tolerant", "Nutritious grain", "Good for beer production"],
+                    hi: ["सूखा सहिष्णु", "पौष्टिक अनाज", "बीयर उत्पादन के लिए अच्छा"],
+                    te: ["కరువు సహిష్ణుత", "పోషకాలు గల ధాన్యం", "బీర్ ఉత్పత్తికి మంచిది"]
+                }
+            },
+            {
+                Crop_ID: 11,
+                Crop_Name: "Jowar (Sorghum)",
+                Season: "Both",
+                Soil_Type: "Sandy Loam",
+                Water_Requirement: "Low",
+                NPK_Recommendation: "80-40-30",
+                Yield: 1600,
+                icon: "🌾",
+                benefits: {
+                    en: ["Drought resistant", "Multiple uses", "Animal feed"],
+                    hi: ["सूखा प्रतिरोधी", "कई उपयोग", "पशु चारा"],
+                    te: ["కరువు నిరోధక", "బహుళ ఉపయోగాలు", "పశువుల మేత"]
+                }
+            },
+            {
+                Crop_ID: 12,
+                Crop_Name: "Tur (Pigeon Pea)",
+                Season: "Kharif",
+                Soil_Type: "Black Soil",
+                Water_Requirement: "Medium",
+                NPK_Recommendation: "20-50-30",
+                Yield: 1200,
+                icon: "🌱",
+                benefits: {
+                    en: ["Nitrogen fixation", "Drought tolerant", "Nutritious pulses"],
+                    hi: ["नाइट्रोजन स्थिरीकरण", "सूखा सहिष्णु", "पौष्टिक दालें"],
+                    te: ["నైట్రోజన్ ఫిక్సేషన్", "కరువు సహిష్ణుత", "పోషకాలు గల పప్పులు"]
+                }
+            },
+            {
+                Crop_ID: 13,
+                Crop_Name: "Urad (Black Gram)",
+                Season: "Kharif",
+                Soil_Type: "Loam",
+                Water_Requirement: "Medium",
+                NPK_Recommendation: "20-40-30",
+                Yield: 1100,
+                icon: "🫘",
+                benefits: {
+                    en: ["Nitrogen fixation", "Short duration", "High protein"],
+                    hi: ["नाइट्रोजन स्थिरीकरण", "कम अवधि", "उच्च प्रोटीन"],
+                    te: ["నైట్రోజన్ ఫిక్సేషన్", "తక్కువ కాలం", "అధిక ప్రోటీన్"]
+                }
+            },
+            {
+                Crop_ID: 14,
+                Crop_Name: "Moong (Green Gram)",
+                Season: "Kharif",
+                Soil_Type: "Sandy Loam",
+                Water_Requirement: "Low",
+                NPK_Recommendation: "20-40-20",
+                Yield: 1000,
+                icon: "🫘",
+                benefits: {
+                    en: ["Short duration", "Nitrogen fixation", "Nutritious pulses"],
+                    hi: ["कम अवधि", "नाइट्रोजन स्थिरीकरण", "पौष्टिक दालें"],
+                    te: ["తక్కువ కాలం", "నైట్రోజన్ ఫిక్సేషన్", "పోషకాలు గల పప్పులు"]
+                }
+            },
+            {
+                Crop_ID: 15,
+                Crop_Name: "Chickpea (Gram)",
+                Season: "Rabi",
+                Soil_Type: "Loam",
+                Water_Requirement: "Low",
+                NPK_Recommendation: "20-50-20",
+                Yield: 1300,
+                icon: "🫘",
+                benefits: {
+                    en: ["High protein", "Drought tolerant", "Good rotation crop"],
+                    hi: ["उच्च प्रोटीन", "सूखा सहिष्णु", "अच्छी फसल चक्र"],
+                    te: ["అధిక ప్రోటీన్", "కరువు సహిష్ణుత", "మంచి పంట మార్పు"]
+                }
+            },
+            {
+                Crop_ID: 16,
+                Crop_Name: "Lentil",
+                Season: "Rabi",
+                Soil_Type: "Loam",
+                Water_Requirement: "Low",
+                NPK_Recommendation: "20-40-20",
+                Yield: 1200,
+                icon: "🫘",
+                benefits: {
+                    en: ["High protein", "Short duration", "Nutritious pulses"],
+                    hi: ["उच्च प्रोटीन", "कम अवधि", "पौष्टिक दालें"],
+                    te: ["అధిక ప్రోటీన్", "తక్కువ కాలం", "పోషకాలు గల పప్పులు"]
+                }
+            },
+            {
+                Crop_ID: 17,
+                Crop_Name: "Sesame",
+                Season: "Kharif",
+                Soil_Type: "Sandy Loam",
+                Water_Requirement: "Low",
+                NPK_Recommendation: "40-20-20",
+                Yield: 900,
+                icon: "🌱",
+                benefits: {
+                    en: ["Oil crop", "Drought tolerant", "High value"],
+                    hi: ["तेल फसल", "सूखा सहिष्णु", "उच्च मूल्य"],
+                    te: ["నూనె పంట", "కరువు సహిష్ణుత", "అధిక విలువ"]
+                }
+            },
+            {
+                Crop_ID: 18,
+                Crop_Name: "Potato",
+                Season: "Rabi",
+                Soil_Type: "Loam",
+                Water_Requirement: "High",
+                NPK_Recommendation: "180-80-100",
+                Yield: 2000,
+                icon: "🥔",
+                benefits: {
+                    en: ["High yield", "Short duration", "Good market demand"],
+                    hi: ["उच्च उत्पादन", "कम अवधि", "अच्छी बाजार मांग"],
+                    te: ["అధిక దిగుబడి", "తక్కువ కాలం", "మంచి మార్కెట్ డిమాండ్"]
+                }
+            },
+            {
+                Crop_ID: 19,
+                Crop_Name: "Onion",
+                Season: "Rabi",
+                Soil_Type: "Sandy Loam",
+                Water_Requirement: "High",
+                NPK_Recommendation: "150-80-100",
+                Yield: 1800,
+                icon: "🧅",
+                benefits: {
+                    en: ["High value", "Good storage", "Essential vegetable"],
+                    hi: ["उच्च मूल्य", "अच्छा भंडारण", "आवश्यक सब्जी"],
+                    te: ["అధిక విలువ", "మంచి నిల్వ", "అవసరమైన కూరగాయ"]
+                }
+            },
+            {
+                Crop_ID: 20,
+                Crop_Name: "Tomato",
+                Season: "Both",
+                Soil_Type: "Loam",
+                Water_Requirement: "Medium",
+                NPK_Recommendation: "120-60-60",
+                Yield: 2000,
+                icon: "🍅",
+                benefits: {
+                    en: ["High value", "Multiple harvests", "Processing potential"],
+                    hi: ["उच्च मूल्य", "कई कटाई", "प्रसंस्करण क्षमता"],
+                    te: ["అధిక విలువ", "బహుళ పంటలు", "ప్రాసెసింగ్ సామర్థ్యం"]
+                }
+            },
+            {
+                Crop_ID: 21,
+                Crop_Name: "Cabbage",
+                Season: "Rabi",
+                Soil_Type: "Loam",
+                Water_Requirement: "High",
+                NPK_Recommendation: "150-80-60",
+                Yield: 1600,
+                icon: "🥬",
+                benefits: {
+                    en: ["High yield", "Good for health", "Market demand"],
+                    hi: ["उच्च उत्पादन", "स्वास्थ्य के लिए अच्छा", "बाजार मांग"],
+                    te: ["అధిక దిగుబడి", "ఆరోగ్యానికి మంచిది", "మార్కెట్ డిమాండ్"]
+                }
+            },
+            {
+                Crop_ID: 22,
+                Crop_Name: "Cauliflower",
+                Season: "Rabi",
+                Soil_Type: "Loam",
+                Water_Requirement: "Medium",
+                NPK_Recommendation: "120-60-60",
+                Yield: 1500,
+                icon: "🥦",
+                benefits: {
+                    en: ["Nutritious", "Good market price", "Short duration"],
+                    hi: ["पौष्टिक", "अच्छी बाजार कीमत", "कम अवधि"],
+                    te: ["పోషకాలు గలది", "మంచి మార్కెట్ ధర", "తక్కువ కాలం"]
+                }
+            },
+            {
+                Crop_ID: 23,
+                Crop_Name: "Peas",
+                Season: "Rabi",
+                Soil_Type: "Loam",
+                Water_Requirement: "Low",
+                NPK_Recommendation: "20-60-20",
+                Yield: 1200,
+                icon: "🫛",
+                benefits: {
+                    en: ["High protein", "Nitrogen fixation", "Short duration"],
+                    hi: ["उच्च प्रोटीन", "नाइट्रोजन स्थिरीकरण", "कम अवधि"],
+                    te: ["అధిక ప్రోటీన్", "నైట్రోజన్ ఫిక్సేషన్", "తక్కువ కాలం"]
+                }
+            },
+            {
+                Crop_ID: 24,
+                Crop_Name: "Banana",
+                Season: "Annual",
+                Soil_Type: "Loam",
+                Water_Requirement: "High",
+                NPK_Recommendation: "200-100-200",
+                Yield: 3000,
+                icon: "🍌",
+                benefits: {
+                    en: ["High yield", "Perennial crop", "Good market demand"],
+                    hi: ["उच्च उत्पादन", "बारहमासी फसल", "अच्छी बाजार मांग"],
+                    te: ["అధిక దిగుబడి", "శాశ్వత పంట", "మంచి మార్కెట్ డిమాండ్"]
+                }
+            },
+            {
+                Crop_ID: 25,
+                Crop_Name: "Mango",
+                Season: "Annual",
+                Soil_Type: "Loamy Sand",
+                Water_Requirement: "Medium",
+                NPK_Recommendation: "500-200-500",
+                Yield: 3500,
+                icon: "🥭",
+                benefits: {
+                    en: ["High value fruit", "Long-term income", "Export potential"],
+                    hi: ["उच्च मूल्य वाला फल", "दीर्घकालिक आय", "निर्यात क्षमता"],
+                    te: ["అధిక విలువ గల పండు", "దీర్ఘకాలిక ఆదాయం", "ఎగుమతి సామర్థ్యం"]
+                }
+            },
+            {
+                Crop_ID: 26,
+                Crop_Name: "Apple",
+                Season: "Annual",
+                Soil_Type: "Loam",
+                Water_Requirement: "Medium",
+                NPK_Recommendation: "300-200-300",
+                Yield: 2500,
+                icon: "🍎",
+                benefits: {
+                    en: ["High value fruit", "Long-term income", "Good for health"],
+                    hi: ["उच्च मूल्य वाला फल", "दीर्घकालिक आय", "स्वास्थ्य के लिए अच्छा"],
+                    te: ["అధిక విలువ గల పండు", "దీర్ఘకాలిక ఆదాయం", "ఆరోగ్యానికి మంచిది"]
+                }
+            },
+            {
+                Crop_ID: 27,
+                Crop_Name: "Grapes",
+                Season: "Annual",
+                Soil_Type: "Sandy Loam",
+                Water_Requirement: "Medium",
+                NPK_Recommendation: "250-100-250",
+                Yield: 2800,
+                icon: "🍇",
+                benefits: {
+                    en: ["High value", "Wine production", "Export potential"],
+                    hi: ["उच्च मूल्य", "शराब उत्पादन", "निर्यात क्षमता"],
+                    te: ["అధిక విలువ", "వైన్ ఉత్పత్తి", "ఎగుమతి సామర్థ్యం"]
+                }
+            },
+            {
+                Crop_ID: 28,
+                Crop_Name: "Tea",
+                Season: "Annual",
+                Soil_Type: "Sandy Loam",
+                Water_Requirement: "High",
+                NPK_Recommendation: "300-120-120",
+                Yield: 2000,
+                icon: "🍵",
+                benefits: {
+                    en: ["High value", "Perennial crop", "Good export market"],
+                    hi: ["उच्च मूल्य", "बारहमासी फसल", "अच्छा निर्यात बाजार"],
+                    te: ["అధిక విలువ", "శాశ్వత పంట", "మంచి ఎగుమతి మార్కెట్"]
+                }
+            },
+            {
+                Crop_ID: 29,
+                Crop_Name: "Coffee",
+                Season: "Annual",
+                Soil_Type: "Loam",
+                Water_Requirement: "High",
+                NPK_Recommendation: "150-120-150",
+                Yield: 2200,
+                icon: "☕",
+                benefits: {
+                    en: ["High value", "Export potential", "Long-term income"],
+                    hi: ["उच्च मूल्य", "निर्यात क्षमता", "दीर्घकालिक आय"],
+                    te: ["అధిక విలువ", "ఎగుమతి సామర్థ్యం", "దీర్ఘకాలిక ఆదాయం"]
+                }
+            },
+            {
+                Crop_ID: 30,
+                Crop_Name: "Coconut",
+                Season: "Annual",
+                Soil_Type: "Sandy",
+                Water_Requirement: "High",
+                NPK_Recommendation: "500-300-500",
+                Yield: 4000,
+                icon: "🥥",
+                benefits: {
+                    en: ["Multiple uses", "High value", "Coastal crop"],
+                    hi: ["कई उपयोग", "उच्च मूल्य", "तटीय फसल"],
+                    te: ["బహుళ ఉపయోగాలు", "అధిక విలువ", "తీర ప్రాంత పంట"]
+                }
+            }
+        ];
+        
+        // Translation System
+        const translations = {
+            english: {
+                logo: "Smart Crop",
+                nav_home: "Home",
+                nav_recommendation: "Get Recommendation",
+                nav_weather: "Weather",
+                nav_about: "About",
+                nav_contact: "Contact",
+                hero_title: "Smart Crop Recommendation System",
+                hero_subtitle: "Get personalized crop recommendations based on your soil type, weather conditions, and location. Maximize your yield with data-driven farming decisions.",
+                hero_cta: "Get Started",
+                features_title: "Why Choose Our System?",
+                feature1_title: "Precise Recommendations",
+                feature1_desc: "Get crop suggestions tailored to your specific soil and climate conditions.",
+                feature2_title: "Mobile Friendly",
+                feature2_desc: "Access recommendations on any device, anywhere in your field.",
+                feature3_title: "Location Based",
+                feature3_desc: "Automatic soil type detection using GPS coordinates for accurate results.",
+                feature4_title: "Data Driven",
+                feature4_desc: "Based on scientific research and agricultural databases.",
+                back_button: "Back to Home",
+                form_title: "Crop Recommendation Form",
+                location_title: "📍 Location Information",
+                location_label: "Location (City/District)",
+                location_placeholder: "Enter your city or district",
+                gps_button: "📍 Use GPS Location",
+                coordinates_text: "📍 Coordinates: ",
+                soil_type_label: "Soil Type",
+                soil_type_default: "Select soil type",
+                ph_label: "pH Level",
+                ph_placeholder: "6.5",
+                rainfall_label: "Annual Rainfall (mm)",
+                rainfall_placeholder: "1000",
+                temperature_label: "Average Temperature (°C)",
+                temperature_placeholder: "25",
+                season_label: "Planting Season",
+                season_default: "Select season",
+                farm_size_label: "Farm Size (acres)",
+                farm_size_placeholder: "2.5",
+                irrigation_label: "Irrigation Type",
+                irrigation_default: "Select irrigation type",
+                budget_label: "Budget Range (₹)",
+                budget_default: "Select budget range",
+                experience_label: "Farming Experience",
+                experience_default: "Select experience level",
+                submit_button: "Get Crop Recommendations",
+                loading_text: "Analyzing your data and generating recommendations...",
+                footer_text: "&copy; 2024 Smart Crop Recommendation System. Helping farmers make better decisions.",
+                getting_location: "Getting location...",
+                location_error: "An unknown error occurred while getting location.",
+                gps_not_supported: "Your browser does not support GPS.",
+                location_error_permission: "You denied the request for Geolocation.",
+                location_error_unavailable: "Location information is unavailable.",
+                location_error_timeout: "The request to get user location timed out.",
+                results_title: "Your Crop Recommendations",
+                location_conditions: "📍 Location & Conditions",
+                recommended_crops: "🌾 Recommended Crops",
+                farming_tips: "💡 Farming Tips",
+                get_new_recommendation: "Get New Recommendation",
+                download_report: "Download Report",
+                ph_range: "pH Range",
+                benefits: "Benefits",
+                soil_preparation: "Soil Preparation",
+                soil_preparation_desc: "Ensure proper soil testing and add necessary nutrients before planting.",
+                water_management: "Water Management",
+                water_management_desc: "Implement efficient irrigation methods to conserve water and improve yield.",
+                pest_control: "Pest Control",
+                pest_control_desc: "Use integrated pest management techniques for sustainable farming.",
+                market_research: "Market Research",
+                market_research_desc: "Research local market prices and demand before finalizing your crop choice.",
+                // Weather translations
+                weather_title: "Weather Information",
+                weather_subtitle: "Get 4-Day Weather Forecast Using GPS Location",
+                weather_button: "Get Weather Forecast",
+                weather_getting_location: "Getting location...",
+                weather_location_not_supported: "Geolocation is not supported by your browser.",
+                weather_fetching_weather: "Fetching weather data...",
+                weather_error_fetching: "Error fetching weather: ",
+                weather_unable_location: "Unable to retrieve your location.",
+                weather_location: "Location",
+                weather_weather: "Weather",
+                weather_temperature: "Temperature",
+                weather_humidity: "Humidity",
+                weather_wind: "Wind",
+                weather_day: "Day"
+            },
+            hindi: {
+                logo: "स्मार्ट क्रॉप",
+                nav_home: "होम",
+                nav_recommendation: "सिफारिशें प्राप्त करें",
+                nav_weather: "मौसम",
+                nav_about: "हमारे बारे में",
+                nav_contact: "संपर्क करें",
+                hero_title: "स्मार्ट क्रॉप सिफारिश प्रणाली",
+                hero_subtitle: "अपनी मिट्टी के प्रकार, मौसम की स्थिति और स्थान के आधार पर व्यक्तिगत फसल सिफारिशें प्राप्त करें। डेटा-आधारित कृषि निर्णयों के साथ अपनी उपज को अधिकतम करें।",
+                hero_cta: "शुरू करें",
+                features_title: "हमारी प्रणाली क्यों चुनें?",
+                feature1_title: "सटीक सिफारिशें",
+                feature1_desc: "अपनी विशिष्ट मिट्टी और जलवायु परिस्थितियों के अनुकूल फसल सुझाव प्राप्त करें।",
+                feature2_title: "मोबाइल अनुकूल",
+                feature2_desc: "अपने खेत में कहीं भी, किसी भी डिवाइस पर सिफारिशों तक पहुंचें।",
+                feature3_title: "स्थान आधारित",
+                feature3_desc: "सटीक परिणामों के लिए GPS निर्देशांकों का उपयोग करके स्वचालित मिट्टी प्रकार का पता लगाना।",
+                feature4_title: "डेटा आधारित",
+                feature4_desc: "वैज्ञानिक अनुसंधान और कृषि डेटाबेस के आधार पर।",
+                back_button: "होम पर वापस जाएं",
+                form_title: "फसल सिफारिश फॉर्म",
+                location_title: "📍 स्थान की जानकारी",
+                location_label: "स्थान (शहर/जिला)",
+                location_placeholder: "अपना शहर या जिला दर्ज करें",
+                gps_button: "📍 GPS स्थान का उपयोग करें",
+                coordinates_text: "📍 निर्देशांक: ",
+                soil_type_label: "मिट्टी का प्रकार",
+                soil_type_default: "मिट्टी का प्रकार चुनें",
+                ph_label: "pH स्तर",
+                ph_placeholder: "6.5",
+                rainfall_label: "वार्षिक वर्षा (मिमी)",
+                rainfall_placeholder: "1000",
+                temperature_label: "औसत तापमान (°C)",
+                temperature_placeholder: "25",
+                season_label: "बुवाई का मौसम",
+                season_default: "मौसम चुनें",
+                farm_size_label: "खेत का आकार (एकड़)",
+                farm_size_placeholder: "2.5",
+                irrigation_label: "सिंचाई का प्रकार",
+                irrigation_default: "सिंचाई का प्रकार चुनें",
+                budget_label: "बजट सीमा (₹)",
+                budget_default: "बजट सीमा चुनें",
+                experience_label: "कृषि अनुभव",
+                experience_default: "अनुभव स्तर चुनें",
+                submit_button: "फसल सिफारिशें प्राप्त करें",
+                loading_text: "आपके डेटा का विश्लेषण कर रहे हैं और सिफारिशें तैयार कर रहे हैं...",
+                footer_text: "&copy; 2024 स्मार्ट क्रॉप सिफारिश प्रणाली। किसानों को बेहतर निर्णय लेने में मदद करना।",
+                getting_location: "स्थान प्राप्त कर रहे हैं...",
+                location_error: "स्थान प्राप्त करते समय एक अज्ञात त्रुटि हुई।",
+                gps_not_supported: "आपका ब्राउज़र GPS का समर्थन नहीं करता।",
+                location_error_permission: "आपने जियोलोकेशन के अनुरोध को अस्वीकार कर दिया।",
+                location_error_unavailable: "स्थान जानकारी उपलब्ध नहीं है।",
+                location_error_timeout: "उपयोगकर्ता स्थान प्राप्त करने का अनुरोध समय समाप्त हो गया।",
+                results_title: "आपके फसल सुझाव",
+                location_conditions: "📍 स्थान और स्थितियां",
+                recommended_crops: "🌾 सुझाई गई फसलें",
+                farming_tips: "💡 कृषि सुझाव",
+                get_new_recommendation: "नया सुझाव प्राप्त करें",
+                download_report: "रिपोर्ट डाउनलोड करें",
+                ph_range: "pH रेंज",
+                benefits: "लाभ",
+                soil_preparation: "मिट्टी की तैयारी",
+                soil_preparation_desc: "रोपण से पहले उचित मिट्टी परीक्षण सुनिश्चित करें और आवश्यक पोषक तत्व जोड़ें।",
+                water_management: "जल प्रबंधन",
+                water_management_desc: "पानी बचाने और उत्पादन बेहतर बनाने के लिए कुशल सिंचाई विधियों को लागू करें।",
+                pest_control: "कीट नियंत्रण",
+                pest_control_desc: "टिकाऊ कृषि के लिए एकीकृत कीट प्रबंधन तकनीकों का उपयोग करें।",
+                market_research: "बाजार अनुसंधान",
+                market_research_desc: "अपनी फसल पसंद को अंतिम रूप देने से पहले स्थानीय बाजार कीमतों और मांग का शोध करें।",
+                // Weather translations
+                weather_title: "मौसम की जानकारी",
+                weather_subtitle: "GPS स्थान का उपयोग करके 4 दिन का मौसम पूर्वानुमान प्राप्त करें",
+                weather_button: "मौसम पूर्वानुमान प्राप्त करें",
+                weather_getting_location: "स्थान प्राप्त कर रहे हैं...",
+                weather_location_not_supported: "आपका ब्राउज़र भू-स्थानन का समर्थन नहीं करता है।",
+                weather_fetching_weather: "मौसम डेटा प्राप्त कर रहे हैं...",
+                weather_error_fetching: "मौसम प्राप्त करने में त्रुटि: ",
+                weather_unable_location: "आपका स्थान प्राप्त करने में असमर्थ।",
+                weather_location: "स्थान",
+                weather_weather: "मौसम",
+                weather_temperature: "तापमान",
+                weather_humidity: "नमी",
+                weather_wind: "हवा",
+                weather_day: "दिन"
+            },
+            telugu: {
+                logo: "స్మార్ట్ క్రాప్",
+                nav_home: "హోమ్",
+                nav_recommendation: "సిఫార్సులు పొందండి",
+                nav_weather: "వాతావరణం",
+                nav_about: "గురించి",
+                nav_contact: "సంప్రదించండి",
+                hero_title: "స్మార్ట్ క్రాప్ సిఫార్సు వ్యవస్థ",
+                hero_subtitle: "మీ నేల రకం, వాతావరణ పరిస్థితులు మరియు స్థానం ఆధారంగా వ్యక్తిగతీకరించిన పంట సిఫార్సులను పొందండి. డేటా-ఆధారిత వ్యవసాయ నిర్ణయాలతో మీ దిగుబడిని గరిష్ఠీకరించండి.",
+                hero_cta: "ప్రారంభించండి",
+                features_title: "మా వ్యవస్థను ఎందుకు ఎంచుకోవాలి?",
+                feature1_title: "ఖచ్చితమైన సిఫార్సులు",
+                feature1_desc: "మీ నిర్దిష్ట నేల మరియు వాతావరణ పరిస్థితులకు అనుగుణంగా పంట సూచనలను పొందండి.",
+                feature2_title: "మొబైల్ స్నేహపూర్వక",
+                feature2_desc: "మీ పొలంలో ఎక్కడైనా, ఏ పరికరంలోనైనా సిఫార్సులను యాక్సెస్ చేయండి.",
+                feature3_title: "స్థాన ఆధారిత",
+                feature3_desc: "ఖచ్చితమైన ఫలితాల కోసం GPS కోఆర్డినేట్లను ఉపయోగించి స్వయంచాలక నేల రకం గుర్తింపు.",
+                feature4_title: "డేటా ఆధారిత",
+                feature4_desc: "శాస్త్రీయ పరిశోధన మరియు వ్యవసాయ డేటాబేస్‌ల ఆధారంగా.",
+                back_button: "హోమ్‌కి తిరిగండి",
+                form_title: "క్రాప్ సిఫార్సు ఫారమ్",
+                location_title: "📍 స్థాన సమాచారం",
+                location_label: "స్థానం (నగరం/జిల్లా)",
+                location_placeholder: "మీ నగరం లేదా జిల్లాను నమోదు చేయండి",
+                gps_button: "📍 GPS స్థానాన్ని ఉపయోగించండి",
+                coordinates_text: "📍 కోఆర్డినేట్లు: ",
+                soil_type_label: "నేల రకం",
+                soil_type_default: "నేల రకాన్ని ఎంచుకోండి",
+                ph_label: "pH స్థాయి",
+                ph_placeholder: "6.5",
+                rainfall_label: "వార్షిక వర్షపాతం (మిమీ)",
+                rainfall_placeholder: "1000",
+                temperature_label: "సగటు ఉష్ణోగ్రత (°C)",
+                temperature_placeholder: "25",
+                season_label: "నాటే సీజన్",
+                season_default: "సీజన్‌ను ఎంచుకోండి",
+                farm_size_label: "పొలం పరిమాణం (ఎకరాలు)",
+                farm_size_placeholder: "2.5",
+                irrigation_label: "సాగునీటి రకం",
+                irrigation_default: "సాగునీటి రకాన్ని ఎంచుకోండి",
+                budget_label: "బడ్జెట్ పరిధి (₹)",
+                budget_default: "బడ్జెట్ పరిధిని ఎంచుకోండి",
+                experience_label: "వ్యవసాయ అనుభవం",
+                experience_default: "అనుభవ స్థాయిని ఎంచుకోండి",
+                submit_button: "క్రాప్ సిఫార్సులు పొందండి",
+                loading_text: "మీ డేటాను విశ్లేషిస్తున్నాము మరియు సిఫార్సులను ఉత్పత్తి చేస్తున్నాము...",
+                footer_text: "&copy; 2024 స్మార్ట్ క్రాప్ సిఫార్సు వ్యవస్థ. రైతులకు మంచి నిర్ణయాలు తీసుకోవడంలో సహాయం చేస్తుంది.",
+                getting_location: "స్థానాన్ని పొందుతున్నాము...",
+                location_error: "స్థానాన్ని పొందేటప్పుడు తెలియని లోపం జరిగింది.",
+                gps_not_supported: "మీ బ్రౌజర్ GPSకి మద్దతు ఇవ్వదు.",
+                location_error_permission: "మీరు జియోలొకేషన్ అభ్యర్థను తిరస్కరించారు.",
+                location_error_unavailable: "స్థాన సమాచారం అందుబాటులో లేదు.",
+                location_error_timeout: "వినియోగదారు స్థానాన్ని పొందడానికి సమయం ముగిసింది.",
+                results_title: "మీ క్రాప్ సిఫార్సులు",
+                location_conditions: "📍 స్థానం మరియు పరిస్థితులు",
+                recommended_crops: "🌾 సిఫార్సు చేయబడిన పంటలు",
+                farming_tips: "💡 వ్యవసాయ చిట్కాలు",
+                get_new_recommendation: "కొత్త సిఫార్సు పొందండి",
+                download_report: "రిపోర్ట్ డౌన్‌లోడ్ చేయండి",
+                ph_range: "pH పరిధి",
+                benefits: "ప్రయోజనాలు",
+                soil_preparation: "నేల సిద్ధత",
+                soil_preparation_desc: "నాటడానికి ముందు సరైన నేల పరీక్షను నిర్ధారించండి మరియు అవసరమైన పోషకాలను జోడించండి.",
+                water_management: "నీటి నిర్వహణ",
+                water_management_desc: "నీటిను ఆదా చేయడానికి మరియు దిగుబడిని మెరుగుపరచడానికి సమర్థవంతమైన నీటిపారుదల పద్ధతులను అమలు చేయండి.",
+                pest_control: "కీటక నియంత్రణ",
+                pest_control_desc: "స్థిరమైన వ్యవసాయం కోసం సమగ్ర కీటక నిర్వహణ పద్ధతులను ఉపయోగించండి.",
+                market_research: "మార్కెట్ పరిశోధన",
+                market_research_desc: "మీ పంట ఎంపికను అంతిమంగా నిర్ణయించే ముందు స్థానిక మార్కెట్ ధరలు మరియు డిమాండ్ గురించి పరిశోధన చేయండి.",
+                // Weather translations
+                weather_title: "వాతావరణ సమాచారం",
+                weather_subtitle: "GPS స్థానాన్ని ఉపయోగించి 4 రోజుల వాతావరణ పూర్వానుమానాన్ని పొందండి",
+                weather_button: "వాతావరణ పూర్వానుమానం పొందండి",
+                weather_getting_location: "స్థానాన్ని పొందుతున్నాము...",
+                weather_location_not_supported: "మీ బ్రౌజర్ భౌగోళిక స్థానానికి మద్దతు ఇవ్వదు.",
+                weather_fetching_weather: "వాతావరణ డేటాను పొందుతున్నాము...",
+                weather_error_fetching: "వాతావరణాన్ని పొందడంలో లోపం: ",
+                weather_unable_location: "మీ స్థానాన్ని పొందలేకపోయాము.",
+                weather_location: "స్థానం",
+                weather_weather: "వాతావరణం",
+                weather_temperature: "ఉష్ణోగ్రత",
+                weather_humidity: "తేమ",
+                weather_wind: "గాలి",
+                weather_day: "రోజు"
+            }
+        };
+        
+        // Initialize global variables
+        let currentLanguage = localStorage.getItem('preferredLanguage') || 'english';
+        let currentLocation = null;
+        let formData = {
+            location: '',
+            soilType: '',
+            phLevel: 0,
+            rainfall: 0,
+            temperature: 0,
+            season: '',
+            farmSize: 0,
+            irrigation: '',
+            budget: '',
+            experience: '',
+            coordinates: null,
+            language: currentLanguage
+        };
+        let recommendations = [];
+        
+        // Apply translations to the page
+        function applyTranslations() {
+            const loader = document.getElementById('translation-loader');
+            if (loader) loader.classList.remove('hidden');
+            
+            // Get all elements with data-translate attribute
+            const elementsToTranslate = document.querySelectorAll('[data-translate]');
+            
+            // Translate each element
+            elementsToTranslate.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                const translatedText = translations[currentLanguage][key] || translations.english[key];
+                if (translatedText) {
+                    // Update element content based on type
+                    if (element.tagName === 'INPUT' && element.type === 'submit') {
+                        element.value = translatedText;
+                    } else if (element.tagName === 'BUTTON') {
+                        // For buttons, preserve inner HTML structure but update text content
+                        const icon = element.querySelector('i');
+                        if (icon) {
+                            element.innerHTML = icon.outerHTML + ' ' + translatedText;
+                        } else {
+                            element.textContent = translatedText;
+                        }
+                    } else {
+                        element.innerHTML = translatedText;
+                    }
+                }
+            });
+            
+            // Translate placeholders
+            const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+            placeholderElements.forEach(element => {
+                const key = element.getAttribute('data-translate-placeholder');
+                const translatedText = translations[currentLanguage][key] || translations.english[key];
+                if (translatedText) {
+                    element.placeholder = translatedText;
+                }
+            });
+            
+            if (loader) loader.classList.add('hidden');
+        }
+        
+        function toggleLanguage() {
+            const button = document.querySelector('.language-toggle');
+            if (button) button.disabled = true;
+            
+            // Cycle through languages
+            if (currentLanguage === 'english') {
+                currentLanguage = 'hindi';
+            } else if (currentLanguage === 'hindi') {
+                currentLanguage = 'telugu';
+            } else {
+                currentLanguage = 'english';
+            }
+            
+            // Save language preference
+            localStorage.setItem('preferredLanguage', currentLanguage);
+            formData.language = currentLanguage;
+            
+            // Update button text to show next language option
+            const langButton = document.getElementById('current-lang');
+            if (langButton) {
+                if (currentLanguage === 'english') {
+                    langButton.textContent = 'हिंदी';
+                } else if (currentLanguage === 'hindi') {
+                    langButton.textContent = 'తెలుగు';
+                } else {
+                    langButton.textContent = 'English';
+                }
+            }
+            
+            // Apply translations
+            setTimeout(() => {
+                applyTranslations();
+                updateResultsContent();
+                if (button) button.disabled = false;
+            }, 300);
+        }
+        
+        function showSection(sectionId) {
+            // Hide all sections
+            document.querySelectorAll('.section').forEach(section => {
+                section.classList.remove('active');
+            });
+            
+            // Show selected section
+            const section = document.getElementById(sectionId);
+            if (section) {
+                section.classList.add('active');
+            }
+            
+            // Update navigation
+            document.querySelectorAll('.nav-links a').forEach(link => {
+                link.classList.remove('active');
+            });
+            
+            // Update active nav based on section
+            if (sectionId === 'home-section') {
+                const homeLink = document.getElementById('home-link');
+                if (homeLink) homeLink.classList.add('active');
+            } else if (sectionId === 'form-section') {
+                const formLink = document.getElementById('form-link');
+                if (formLink) formLink.classList.add('active');
+            } else if (sectionId === 'weather-section') {
+                const weatherLink = document.getElementById('weather-link');
+                if (weatherLink) weatherLink.classList.add('active');
+            }
+            
+            window.scrollTo(0, 0);
+        }
+        
+        function showForm(event) {
+            if (event) {
+                event.preventDefault();
+                const target = event.target || event;
+                target.classList.add('clicked');
+            }
+            showSection('form-section');
+        }
+        
+        function showHome() {
+            showSection('home-section');
+        }
+        
+        function showWeather() {
+            showSection('weather-section');
+        }
+        
+        // Navigation link handlers
+        document.addEventListener('DOMContentLoaded', function() {
+            const homeLink = document.getElementById('home-link');
+            const formLink = document.getElementById('form-link');
+            const weatherLink = document.getElementById('weather-link');
+            
+            if (homeLink) {
+                homeLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showHome();
+                });
+            }
+            
+            if (formLink) {
+                formLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showForm();
+                });
+            }
+            
+            if (weatherLink) {
+                weatherLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    showWeather();
+                });
+            }
+            
+            // Initialize language button text
+            updateLanguageButton();
+            applyTranslations();
+            
+            // Initialize chatbot
+            initializeChatbot();
+        });
+        
+        function updateLanguageButton() {
+            const langButton = document.getElementById('current-lang');
+            if (langButton) {
+                if (currentLanguage === 'english') {
+                    langButton.textContent = 'हिंदी';
+                } else if (currentLanguage === 'hindi') {
+                    langButton.textContent = 'తెలుగు';
+                } else {
+                    langButton.textContent = 'English';
+                }
+            }
+        }
+        
+        // Weather functionality
+        function getWeather() {
+            const output = document.getElementById('weather-output');
+            const button = document.querySelector('.weather-button');
+            
+            if (!output || !button) return;
+            
+            const lang = currentLanguage === 'hindi' ? 'hindi' : currentLanguage === 'telugu' ? 'telugu' : 'english';
+            const t = translations[lang];
+            
+            button.disabled = true;
+            output.innerHTML = `<div class="spinner"></div><p>${t.weather_fetching_weather}</p>`;
+            
+            if (!navigator.geolocation) {
+                output.textContent = t.weather_location_not_supported;
+                button.disabled = false;
+                return;
+            }
+            
+            navigator.geolocation.getCurrentPosition(success, error);
+            
+            function success(position) {
+                const lat = position.coords.latitude;
+                const lon = position.coords.longitude;
+                
+                // Call OpenWeatherMap 5-day forecast API
+                const API_KEY = '47d34b85cb2968b41f2d1c05502a4864';
+                fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&appid=${API_KEY}`)
+                    .then(res => {
+                        if (!res.ok) {
+                            throw new Error(`API request failed with status ${res.status}`);
+                        }
+                        return res.json();
+                    })
+                    .then(data => {
+                        // Process forecast data to get one forecast per day for the next 4 days
+                        const dailyForecasts = processForecastData(data);
+                        
+                        // Display the 4-day forecast
+                        displayWeatherForecast(dailyForecasts, t);
+                        button.disabled = false;
+                    })
+                    .catch(err => {
+                        console.error('Weather API error:', err);
+                        output.textContent = t.weather_error_fetching + err.message;
+                        button.disabled = false;
+                    });
+            }
+            
+            function error() {
+                output.textContent = t.weather_unable_location;
+                button.disabled = false;
+            }
+        }
+        
+        function processForecastData(data) {
+            // Group forecasts by day
+            const dailyData = {};
+            
+            data.list.forEach(item => {
+                const date = new Date(item.dt * 1000);
+                const day = date.toLocaleDateString();
+                
+                if (!dailyData[day]) {
+                    dailyData[day] = [];
+                }
+                
+                dailyData[day].push(item);
+            });
+            
+            // Get one forecast per day for the next 4 days
+            const dailyForecasts = [];
+            const days = Object.keys(dailyData);
+            
+            // Skip today if it's late in the day
+            let startIndex = 0;
+            const currentHour = new Date().getHours();
+            if (currentHour > 18) {
+                startIndex = 1;
+            }
+            
+            for (let i = startIndex; i < Math.min(startIndex + 4, days.length); i++) {
+                const day = days[i];
+                const forecasts = dailyData[day];
+                
+                // Get the forecast at noon (12:00 PM) for this day
+                const noonForecast = forecasts.find(f => {
+                    const hour = new Date(f.dt * 1000).getHours();
+                    return hour >= 11 && hour <= 13;
+                });
+                
+                // If noon forecast not available, use the first forecast of the day
+                const forecast = noonForecast || forecasts[0];
+                
+                if (forecast) {
+                    dailyForecasts.push({
+                        date: day,
+                        temp: Math.round(forecast.main.temp - 273.15), // Convert from Kelvin to Celsius
+                        description: forecast.weather[0].description,
+                        icon: getWeatherIcon(forecast.weather[0].icon),
+                        humidity: forecast.main.humidity,
+                        wind: forecast.wind.speed
+                    });
+                }
+            }
+            
+            return dailyForecasts;
+        }
+        
+        function getWeatherIcon(iconCode) {
+            const iconMap = {
+                "01d": "☀️", "01n": "🌙",
+                "02d": "⛅", "02n": "☁️",
+                "03d": "☁️", "03n": "☁️",
+                "04d": "☁️", "04n": "☁️",
+                "09d": "🌧️", "09n": "🌧️",
+                "10d": "🌦️", "10n": "🌧️",
+                "11d": "⛈", "11n": "⛈",
+                "13d": "❄️", "13n": "❄️",
+                "50d": "🌫️", "50n": "🌫️"
+            };
+            
+            return iconMap[iconCode] || "🌡️";
+        }
+        
+        function displayWeatherForecast(forecasts, translations) {
+            const output = document.getElementById('weather-output');
+            
+            if (!output) return;
+            
+            if (forecasts.length === 0) {
+                output.textContent = translations.weather_error_fetching + "No forecast data available";
+                return;
+            }
+            
+            // Create HTML for the 4-day forecast
+            let html = '<div class="weather-forecast">';
+            
+            forecasts.forEach((forecast, index) => {
+                const date = new Date(forecast.date);
+                const dayName = date.toLocaleDateString('en-US', { weekday: 'long' });
+                const dateStr = date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                
+                html += `
+                    <div class="weather-day">
+                        <div class="weather-date">${dayName}<br>${dateStr}</div>
+                        <div class="weather-icon">${forecast.icon}</div>
+                        <div class="weather-temp">${forecast.temp}°C</div>
+                        <div class="weather-desc">${forecast.description}</div>
+                        <div class="weather-details">
+                            <div class="weather-detail">
+                                <div class="weather-detail-label">${translations.weather_humidity}</div>
+                                <div class="weather-detail-value">${forecast.humidity}%</div>
+                            </div>
+                            <div class="weather-detail">
+                                <div class="weather-detail-label">${translations.weather_wind}</div>
+                                <div class="weather-detail-value">${forecast.wind} m/s</div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            output.innerHTML = html;
+        }
+        
+        /**
+         * -----------------------------------------------------------------
+         * NEW ROBUST GPS LOCATION LOGIC
+         * -----------------------------------------------------------------
+         */
+
+        /**
+         * Core function to get location coordinates and name. Returns a Promise.
+         * This function handles the API calls and logic.
+         */
+        const getAccurateLocation = () => {
+            return new Promise((resolve, reject) => {
+                const t = translations[currentLanguage];
+
+                if (!navigator.geolocation) {
+                    reject(new Error(t.gps_not_supported));
+                    return;
+                }
+
+                const options = {
+                    enableHighAccuracy: true,
+                    timeout: 15000, // 15 seconds
+                    maximumAge: 300000 // Cache location for 5 minutes
+                };
+
+                navigator.geolocation.getCurrentPosition(
+                    async (position) => {
+                        const { latitude: lat, longitude: lon } = position.coords;
+                        
+                        try {
+                            // 1. Try OpenWeatherMap first for reverse geocoding
+                            // IMPORTANT: Replace with your own key in a real application
+                            const apiKey = '47d34b85cb2968b41f2d1c05502a4864';
+                            const response = await fetch(
+                                `https://api.openweathermap.org/geo/1.0/reverse?lat=${lat}&lon=${lon}&limit=1&appid=${apiKey}`
+                            );
+                            
+                            if (response.ok) {
+                                const data = await response.json();
+                                if (data && data.length > 0) {
+                                    const locationName = data[0]?.name || data[0]?.local_names?.en || 'Unknown Location';
+                                    resolve({
+                                        coordinates: { lat, lon },
+                                        name: locationName
+                                    });
+                                    return; // Success, exit the function
+                                }
+                            }
+
+                            // 2. If OpenWeatherMap fails, fallback to Nominatim (OpenStreetMap)
+                            const nominatimResponse = await fetch(
+                                `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&zoom=10&accept-language=en`
+                            );
+                            
+                            if (nominatimResponse.ok) {
+                                const nominatimData = await nominatimResponse.json();
+                                const locationName = nominatimData.address?.city || 
+                                                     nominatimData.address?.town || 
+                                                     nominatimData.address?.village || 
+                                                     nominatimData.display_name?.split(',')[0] ||
+                                                     'Unknown Location';
+                                resolve({
+                                    coordinates: { lat, lon },
+                                    name: locationName
+                                });
+                            } else {
+                                // 3. If both services fail, throw an error to be caught below
+                                throw new Error("Both geocoding services failed.");
+                            }
+                        } catch (error) {
+                            console.error('Error getting location name:', error);
+                            // Final fallback: resolve with just the coordinates as the name
+                            resolve({
+                                coordinates: { lat, lon },
+                                name: `${lat.toFixed(4)}, ${lon.toFixed(4)}`
+                            });
+                        }
+                    },
+                    (error) => {
+                        // This handles errors from navigator.geolocation.getCurrentPosition itself
+                        let errorMessage;
+                        switch (error.code) {
+                            case error.PERMISSION_DENIED:
+                                errorMessage = t.location_error_permission;
+                                break;
+                            case error.POSITION_UNAVAILABLE:
+                                errorMessage = t.location_error_unavailable;
+                                break;
+                            case error.TIMEOUT:
+                                errorMessage = t.location_error_timeout;
+                                break;
+                            default:
+                                errorMessage = t.location_error;
+                                break;
+                        }
+                        reject(new Error(errorMessage));
+                    },
+                    options
+                );
+            });
+        };
+
+        /**
+         * Event handler for the "Use GPS" button click.
+         * This function manages the UI state (button text, loading, etc.)
+         * and calls the core `getAccurateLocation` function.
+         */
+        async function getCurrentLocation() {
+            const button = document.querySelector('.gps-button');
+            const coordinatesDisplay = document.getElementById('coordinatesDisplay');
+            const coordinatesSpan = document.getElementById('coordinates');
+            const locationInput = document.getElementById('location');
+
+            if (!button || !coordinatesDisplay || !coordinatesSpan || !locationInput) return;
+
+            const t = translations[currentLanguage];
+
+            const resetButtonStyle = () => {
+                button.disabled = false;
+                button.innerHTML = t.gps_button || "📍 Use GPS Location";
+            };
+
+            button.disabled = true;
+            button.innerHTML = t.getting_location || "Getting location...";
+            
+            try {
+                // Await the result from our new Promise-based function
+                const locationData = await getAccurateLocation();
+                
+                currentLocation = locationData.coordinates;
+                const { lat, lon } = locationData.coordinates;
+
+                // Update UI with the retrieved name and coordinates
+                locationInput.value = locationData.name;
+                coordinatesSpan.textContent = `${lat.toFixed(5)}, ${lon.toFixed(5)}`;
+                coordinatesDisplay.style.display = 'block';
+
+            } catch (error) {
+                // This will catch any rejection from the Promise (e.g., permission denied)
+                console.error("Geolocation Error:", error.message);
+                alert(error.message);
+                coordinatesDisplay.style.display = 'none'; // Hide coordinates on error
+            } finally {
+                // This block runs whether the try succeeded or failed, ensuring the button is always reset
+                resetButtonStyle();
+            }
+        }
+        
+        function calculateCropScore(crop, data) {
+            let score = 0;
+            let maxScore = 0;
+            
+            // Soil type match (30 points)
+            maxScore += 30;
+            if (crop.Soil_Type.toLowerCase() === data.soilType.toLowerCase()) {
+                score += 30;
+            } else if (
+                (crop.Soil_Type === "Sandy Loam" && data.soilType === "sandy loam") ||
+                (crop.Soil_Type === "Black Soil" && data.soilType === "black soil") ||
+                (crop.Soil_Type === "Loamy Sand" && data.soilType === "loamy sand")
+            ) {
+                score += 25;
+            } else if (crop.Soil_Type.includes("Loam") && data.soilType.includes("loam")) {
+                score += 20;
+            } else if (crop.Soil_Type.includes("Sandy") && data.soilType.includes("sandy")) {
+                score += 15;
+            }
+            
+            // Season match (25 points)
+            maxScore += 25;
+            if (crop.Season.toLowerCase() === data.season.toLowerCase()) {
+                score += 25;
+            } else if (crop.Season === "Both" && (data.season === "kharif" || data.season === "rabi")) {
+                score += 20;
+            } else if (crop.Season === "Annual") {
+                score += 15;
+            }
+            
+            // Water requirement match (20 points)
+            maxScore += 20;
+            const waterMap = {
+                "High": ["irrigated", "drip"],
+                "Medium": ["irrigated", "rainfed"],
+                "Low": ["rainfed"]
+            };
+            if (waterMap[crop.Water_Requirement] && waterMap[crop.Water_Requirement].includes(data.irrigation)) {
+                score += 20;
+            } else if (
+                (crop.Water_Requirement === "High" && data.irrigation === "sprinkler") ||
+                (crop.Water_Requirement === "Medium" && data.irrigation === "drip")
+            ) {
+                score += 15;
+            }
+            
+            // pH level match (15 points)
+            maxScore += 15;
+            const pH = parseFloat(data.phLevel);
+            if (pH >= 6.0 && pH <= 7.5) {
+                score += 15;
+            } else if (pH >= 5.5 && pH <= 8.0) {
+                score += 10;
+            } else if (pH >= 5.0 && pH <= 8.5) {
+                score += 5;
+            }
+            
+            // Rainfall match (10 points)
+            maxScore += 10;
+            const rainfall = parseInt(data.rainfall);
+            if (crop.Water_Requirement === "High" && rainfall >= 1000) {
+                score += 10;
+            } else if (crop.Water_Requirement === "Medium" && rainfall >= 500 && rainfall <= 1500) {
+                score += 10;
+            } else if (crop.Water_Requirement === "Low" && rainfall <= 800) {
+                score += 10;
+            } else if (
+                (crop.Water_Requirement === "High" && rainfall >= 800) ||
+                (crop.Water_Requirement === "Medium" && rainfall >= 400) ||
+                (crop.Water_Requirement === "Low" && rainfall <= 1000)
+            ) {
+                score += 5;
+            }
+            
+            return Math.round((score / maxScore) * 100);
+        }
+        
+        function getRecommendations(data) {
+            const crops = [];
+            
+            // Filter and score crops based on user input
+            cropDatabase.forEach(crop => {
+                const score = calculateCropScore(crop, data);
+                if (score >= 40) { // Only show crops with 40%+ compatibility
+                    crops.push({
+                        ...crop,
+                        score
+                    });
+                }
+            });
+            
+            // Sort by score (highest first)
+            return crops.sort((a, b) => b.score - a.score);
+        }
+        
+        function getCropClass(score) {
+            if (score >= 80) return 'recommended';
+            if (score >= 65) return 'good';
+            return 'moderate';
+        }
+        
+        function updateResultsContent() {
+            if (!formData || !recommendations || recommendations.length === 0) {
+                console.error('No form data or recommendations available');
+                return;
+            }
+            
+            const lang = currentLanguage === 'hindi' ? 'hi' : currentLanguage === 'telugu' ? 'te' : 'en';
+            
+            // Update location info
+            const locationGrid = document.getElementById('locationGrid');
+            const labels = {
+                en: { 
+                    location: 'Location', 
+                    soil: 'Soil Type', 
+                    ph: 'pH Level', 
+                    rainfall: 'Rainfall', 
+                    temperature: 'Temperature', 
+                    season: 'Season' 
+                },
+                hi: { 
+                    location: 'स्थान', 
+                    soil: 'मिट्टी का प्रकार', 
+                    ph: 'pH स्तर', 
+                    rainfall: 'वर्षा', 
+                    temperature: 'तापमान', 
+                    season: 'मौसम' 
+                },
+                te: { 
+                    location: 'స్థానం', 
+                    soil: 'నేల రకం', 
+                    ph: 'pH స్థాయి', 
+                    rainfall: 'వర్షపాతం', 
+                    temperature: 'ఉష్ణోగ్రత', 
+                    season: 'కాలం' 
+                }
+            };
+            
+            if (locationGrid) {
+                locationGrid.innerHTML = `
+                    <div class="location-item">
+                        <strong>${labels[lang].location}:</strong><br>
+                        ${formData.location}
+                    </div>
+                    <div class="location-item">
+                        <strong>${labels[lang].soil}:</strong><br>
+                        ${formData.soilType}
+                    </div>
+                    <div class="location-item">
+                        <strong>${labels[lang].ph}:</strong><br>
+                        ${formData.phLevel}
+                    </div>
+                    <div class="location-item">
+                        <strong>${labels[lang].rainfall}:</strong><br>
+                        ${formData.rainfall} mm
+                    </div>
+                    <div class="location-item">
+                        <strong>${labels[lang].temperature}:</strong><br>
+                        ${formData.temperature}°C
+                    </div>
+                    <div class="location-item">
+                        <strong>${labels[lang].season}:</strong><br>
+                        ${formData.season}
+                    </div>
+                `;
+            }
+            
+            // Update crop recommendations
+            const cropGrid = document.getElementById('cropGrid');
+            if (cropGrid) {
+                cropGrid.innerHTML = '';
+                
+                recommendations.forEach(crop => {
+                    const cropCard = document.createElement('div');
+                    cropCard.className = `crop-card ${getCropClass(crop.score)}`;
+                    
+                    const benefits = crop.benefits[lang] || crop.benefits.en;
+                    
+                    cropCard.innerHTML = `
+                        <div class="crop-header">
+                            <div class="crop-icon">${crop.icon}</div>
+                            <div class="crop-name">${crop.Crop_Name}</div>
+                            <div class="crop-score">${crop.score}%</div>
+                        </div>
+                        <div class="crop-details">
+                            <div class="detail-item">
+                                <span class="detail-label">${labels[lang].soil}:</span>
+                                <span class="detail-value">${crop.Soil_Type}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">${translations[currentLanguage]['ph_range']}:</span>
+                                <span class="detail-value">6.0 - 7.5</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Water:</span>
+                                <span class="detail-value">${crop.Water_Requirement}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Season:</span>
+                                <span class="detail-value">${crop.Season}</span>
+                            </div>
+                            <div class="detail-item">
+                                <span class="detail-label">Yield:</span>
+                                <span class="detail-value">${crop.Yield} kg/acre</span>
+                            </div>
+                        </div>
+                        <div class="crop-benefits">
+                            <h4>${translations[currentLanguage]['benefits']}</h4>
+                            <ul>
+                                ${benefits.map(benefit => `<li>${benefit}</li>`).join('')}
+                            </ul>
+                        </div>
+                    `;
+                    
+                    cropGrid.appendChild(cropCard);
+                });
+            }
+            
+            // Update tips
+            const tipsGrid = document.getElementById('tipsGrid');
+            if (tipsGrid) {
+                const tips = [
+                    {
+                        title: translations[currentLanguage]['soil_preparation'],
+                        content: translations[currentLanguage]['soil_preparation_desc']
+                    },
+                    {
+                        title: translations[currentLanguage]['water_management'],
+                        content: translations[currentLanguage]['water_management_desc']
+                    },
+                    {
+                        title: translations[currentLanguage]['pest_control'],
+                        content: translations[currentLanguage]['pest_control_desc']
+                    },
+                    {
+                        title: translations[currentLanguage]['market_research'],
+                        content: translations[currentLanguage]['market_research_desc']
+                    }
+                ];
+                
+                tipsGrid.innerHTML = tips.map(tip => `
+                    <div class="tip-card">
+                        <h4>${tip.title}</h4>
+                        <p>${tip.content}</p>
+                    </div>
+                `).join('');
+            }
+        }
+        
+        function downloadReport() {
+            if (!formData || !recommendations || recommendations.length === 0) {
+                alert('No data available to download');
+                return;
+            }
+            
+            // Create a simple text report
+            const lang = currentLanguage === 'hindi' ? 'hi' : currentLanguage === 'telugu' ? 'te' : 'en';
+            
+            const report = `
+SMART CROP RECOMMENDATION REPORT
+================================
+Location: ${formData.location}
+Soil Type: ${formData.soilType}
+pH Level: ${formData.phLevel}
+Rainfall: ${formData.rainfall} mm
+Temperature: ${formData.temperature}°C
+Season: ${formData.season}
+Farm Size: ${formData.farmSize} acres
+Irrigation: ${formData.irrigation}
+Budget: ${formData.budget}
+Experience: ${formData.experience}
+TOP RECOMMENDATIONS:
+===================
+${recommendations.slice(0, 5).map((crop, index) => `
+${index + 1}. ${crop.Crop_Name} (${crop.score}% compatibility)
+   - Soil Type: ${crop.Soil_Type}
+   - Water Requirement: ${crop.Water_Requirement}
+   - Season: ${crop.Season}
+   - Expected Yield: ${crop.Yield} kg/acre
+   - NPK Recommendation: ${crop.NPK_Recommendation}
+   - Benefits: ${(crop.benefits[lang] || crop.benefits.en).join(', ')}
+`).join('')}
+Generated on: ${new Date().toLocaleDateString()}
+            `;
+            
+            const blob = new Blob([report], { type: 'text/plain' });
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'crop-recommendation-report.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.URL.revokeObjectURL(url);
+        }
+        
+        // Form submission handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const cropForm = document.getElementById('cropForm');
+            if (cropForm) {
+                cropForm.addEventListener('submit', function (e) {
+                    e.preventDefault();
+                    
+                    // Form validation
+                    const location = document.getElementById('location').value;
+                    const soilType = document.getElementById('soilType').value;
+                    const phLevel = document.getElementById('phLevel').value;
+                    const rainfall = document.getElementById('rainfall').value;
+                    const temperature = document.getElementById('temperature').value;
+                    const season = document.getElementById('season').value;
+                    const farmSize = document.getElementById('farmSize').value;
+                    const irrigation = document.getElementById('irrigation').value;
+                    const budget = document.getElementById('budget').value;
+                    const experience = document.getElementById('experience').value;
+                    
+                    if (!location || !soilType || !phLevel || !rainfall || !temperature || !season || !farmSize || !irrigation || !budget || !experience) {
+                        const t = translations[currentLanguage];
+                        alert((t && t.form_validation_error) ? t.form_validation_error : 'Please fill in all required fields');
+                        return;
+                    }
+                    
+                    const loading = document.getElementById('loading');
+                    const submitButton = document.querySelector('.submit-button');
+                    
+                    if (loading) loading.style.display = 'block';
+                    if (submitButton) submitButton.disabled = true;
+                    
+                    // Collect form data
+                    formData = {
+                        location: location,
+                        soilType: soilType,
+                        phLevel: parseFloat(phLevel),
+                        rainfall: parseInt(rainfall),
+                        temperature: parseInt(temperature),
+                        season: season,
+                        farmSize: parseFloat(farmSize),
+                        irrigation: irrigation,
+                        budget: budget,
+                        experience: experience,
+                        coordinates: currentLocation,
+                        language: currentLanguage
+                    };
+                    
+                    // Simulate processing time
+                    setTimeout(() => {
+                        recommendations = getRecommendations(formData);
+                        updateResultsContent();
+                        if (loading) loading.style.display = 'none';
+                        if (submitButton) submitButton.disabled = false;
+                        showSection('results-section');
+                    }, 2000);
+                });
+            }
+        });
+        
+        // Enhanced Chatbot functionality
+        function initializeChatbot() {
+            // Chatbot elements
+            const chatbotButton = document.getElementById('chatbotButton');
+            const chatbotWindow = document.getElementById('chatbotWindow');
+            const chatbotClose = document.getElementById('chatbotClose');
+            const chatbotInput = document.getElementById('chatbotInput');
+            const chatbotSend = document.getElementById('chatbotSend');
+            const chatbotMessages = document.getElementById('chatbotMessages');
+            
+            if (!chatbotButton || !chatbotWindow || !chatbotClose || !chatbotInput || !chatbotSend || !chatbotMessages) {
+                console.error('Chatbot elements not found');
+                return;
+            }
+            
+            // Toggle chatbot window
+            chatbotButton.addEventListener('click', function() {
+                chatbotWindow.classList.toggle('active');
+                if (chatbotWindow.classList.contains('active')) {
+                    chatbotInput.focus();
+                }
+            });
+            
+            chatbotClose.addEventListener('click', function() {
+                chatbotWindow.classList.remove('active');
+            });
+            
+            // Auto-resize textarea
+            window.autoResize = function(textarea) {
+                textarea.style.height = 'auto';
+                textarea.style.height = Math.min(textarea.scrollHeight, 120) + 'px';
+            };
+            
+            // Handle Enter key
+            window.handleKeyPress = function(event) {
+                if (event.key === 'Enter' && !event.shiftKey) {
+                    event.preventDefault();
+                    sendMessage();
+                }
+            };
+            
+            // Send suggestion
+            window.sendSuggestion = function(text) {
+                chatbotInput.value = text;
+                sendMessage();
+            };
+            
+            // Send message function
+            window.sendMessage = function() {
+                const message = chatbotInput.value.trim();
+                if (message === '') return;
+                
+                // Add user message
+                const userMessage = document.createElement('div');
+                userMessage.className = 'message user-message';
+                userMessage.innerHTML = `
+                    ${message}
+                    <div class="message-time">${getCurrentTime()}</div>
+                `;
+                chatbotMessages.appendChild(userMessage);
+                
+                // Clear input and reset height
+                chatbotInput.value = '';
+                chatbotInput.style.height = 'auto';
+                
+                // Scroll to bottom
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+                
+                // Disable send button temporarily
+                chatbotSend.disabled = true;
+                
+                // Show typing indicator
+                const typingIndicator = document.createElement('div');
+                typingIndicator.className = 'chatbot-typing';
+                typingIndicator.innerHTML = '<span></span><span></span><span></span>';
+                chatbotMessages.appendChild(typingIndicator);
+                
+                // Scroll to bottom
+                chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+                
+                // Generate bot response
+                setTimeout(() => {
+                    // Remove typing indicator
+                    chatbotMessages.removeChild(typingIndicator);
+                    
+                    // Add bot response
+                    const botResponse = generateBotResponse(message);
+                    const botMessage = document.createElement('div');
+                    botMessage.className = 'message bot-message';
+                    botMessage.innerHTML = `
+                        ${botResponse.text}
+                        ${botResponse.actions ? `<div class="quick-actions">${botResponse.actions.map(action => `<span class="quick-action" onclick="sendSuggestion('${action}')">${action}</span>`).join('')}</div>` : ''}
+                        <div class="message-time">${getCurrentTime()}</div>
+                    `;
+                    chatbotMessages.appendChild(botMessage);
+                    
+                    // Scroll to bottom
+                    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+                    
+                    // Re-enable send button
+                    chatbotSend.disabled = false;
+                    
+                    // Focus input
+                    chatbotInput.focus();
+                }, 1000 + Math.random() * 1000); // Random delay between 1-2 seconds
+            };
+            
+            // Get current time
+            function getCurrentTime() {
+                const now = new Date();
+                return now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            
+            // Generate intelligent bot response
+            function generateBotResponse(message) {
+                const lowerMessage = message.toLowerCase();
+                
+                // Greetings
+                if (lowerMessage.includes('hello') || lowerMessage.includes('hi') || lowerMessage.includes('hey') || lowerMessage.includes('good morning') || lowerMessage.includes('good afternoon') || lowerMessage.includes('good evening')) {
+                    const greetings = [
+                        "Hello! 🌱 I'm your Smart Crop Assistant. How can I help you today?",
+                        "Hi there! Ready to help you with your farming needs. What would you like to know?",
+                        "Greetings! I'm here to assist you with crop recommendations and farming advice."
+                    ];
+                    return {
+                        text: greetings[Math.floor(Math.random() * greetings.length)],
+                        actions: ["Crop recommendations", "Weather info", "Soil types", "Farming tips"]
+                    };
+                }
+                
+                // Crop recommendations
+                if (lowerMessage.includes('recommendation') || lowerMessage.includes('crop') || lowerMessage.includes('suggest') || lowerMessage.includes('which crop')) {
+                    if (lowerMessage.includes('clay')) {
+                        return {
+                            text: "For clay soil, I recommend these crops: 🌾 Rice, 🌿 Cotton, and 🥬 Cabbage. Clay soil retains water well, making it ideal for these crops. Would you like specific growing tips for any of these?",
+                            actions: ["Rice growing tips", "Cotton cultivation", "Cabbage farming"]
+                        };
+                    }
+                    if (lowerMessage.includes('sandy')) {
+                        return {
+                            text: "Sandy soil is great for drought-resistant crops! I recommend: 🌾 Bajra (Pearl Millet), 🥜 Groundnut, and 🌱 Sesame. These crops thrive in well-drained sandy soil.",
+                            actions: ["Bajra cultivation", "Groundnut farming", "Sesame growing tips"]
+                        };
+                    }
+                    if (lowerMessage.includes('loam')) {
+                        return {
+                            text: "Loam soil is excellent for most crops! Top recommendations: 🌽 Maize, 🌾 Wheat, and 🍅 Tomato. Loam provides good drainage and nutrient retention.",
+                            actions: ["Maize farming", "Wheat cultivation", "Tomato growing tips"]
+                        };
+                    }
+                    if (lowerMessage.includes('black soil')) {
+                        return {
+                            text: "Black soil (regur soil) is perfect for: 🌿 Cotton, 🫘 Soybean, and 🌱 Tur (Pigeon Pea). These crops thrive in the nutrient-rich black soil.",
+                            actions: ["Cotton farming", "Soybean cultivation", "Tur growing tips"]
+                        };
+                    }
+                    return {
+                        text: "To get personalized crop recommendations, please fill out our recommendation form with details about your soil type, location, and farming conditions. You can access it from the main menu.",
+                        actions: ["Go to recommendation form", "Soil types info", "Seasonal crops"]
+                    };
+                }
+                
+                // Soil types
+                if (lowerMessage.includes('soil') || lowerMessage.includes('soil type') || lowerMessage.includes('soil fertility')) {
+                    if (lowerMessage.includes('improve') || lowerMessage.includes('fertility')) {
+                        return {
+                            text: "To improve soil fertility: 🌱 Add organic compost, 🌾 Use green manure crops, 🔄 Practice crop rotation, and 💧 Maintain proper moisture. Would you like detailed tips for any of these?",
+                            actions: ["Composting guide", "Green manure crops", "Crop rotation benefits"]
+                        };
+                    }
+                    return {
+                        text: "There are several soil types suitable for farming:\n\n🟤 Clay Soil: Good for rice, cotton\n🟡 Sandy Soil: Ideal for millets, groundnut\n🟫 Loam Soil: Perfect for most crops\n⚫ Black Soil: Great for cotton, soybean\n\nWhich soil type would you like to know more about?",
+                        actions: ["Clay soil crops", "Sandy soil crops", "Loam soil crops", "Black soil crops"]
+                    };
+                }
+                
+                // Weather related
+                if (lowerMessage.includes('weather') || lowerMessage.includes('rainfall') || lowerMessage.includes('temperature') || lowerMessage.includes('climate')) {
+                    return {
+                        text: "You can get detailed weather information including 4-day forecasts using our Weather feature. It uses your GPS location to provide accurate weather data for your area. This helps in planning your farming activities better.",
+                        actions: ["Get weather forecast", "Weather-based farming", "Irrigation planning"]
+                    };
+                }
+                
+                // Seasons
+                if (lowerMessage.includes('season') || lowerMessage.includes('kharif') || lowerMessage.includes('rabi') || lowerMessage.includes('zaid')) {
+                    if (lowerMessage.includes('kharif')) {
+                        return {
+                            text: "Kharif season (monsoon) crops: 🌾 Rice, 🌽 Maize, 🌿 Cotton, 🥜 Groundnut. These crops are sown with the onset of monsoon and harvested in autumn.",
+                            actions: ["Rice cultivation", "Maize farming", "Cotton growing tips"]
+                        };
+                    }
+                    if (lowerMessage.includes('rabi')) {
+                        return {
+                            text: "Rabi season (winter) crops: 🌾 Wheat, 🌼 Mustard, 🥔 Potato, 🫛 Peas. These are sown in winter and harvested in spring.",
+                            actions: ["Wheat cultivation", "Mustard farming", "Potato growing tips"]
+                        };
+                    }
+                    if (lowerMessage.includes('zaid')) {
+                        return {
+                            text: "Zaid season (summer) crops: 🍅 Tomato, 🥒 Cucumber, 🌽 Maize, 🍉 Watermelon. These are grown between Rabi and Kharif seasons.",
+                            actions: ["Tomato farming", "Cucumber cultivation", "Watermelon growing tips"]
+                        };
+                    }
+                    return {
+                        text: "Different crops are suited to different seasons:\n\n🌧️ Kharif (Monsoon): Rice, Maize, Cotton\n❄️ Rabi (Winter): Wheat, Mustard, Potato\n☀️ Zaid (Summer): Tomato, Cucumber, Watermelon\n\nWhich season interests you?",
+                        actions: ["Kharif crops", "Rabi crops", "Zaid crops", "Annual crops"]
+                    };
+                }
+                
+                // Water and irrigation
+                if (lowerMessage.includes('water') || lowerMessage.includes('irrigation') || lowerMessage.includes('drought')) {
+                    if (lowerMessage.includes('drought') || lowerMessage.includes('less water')) {
+                        return {
+                            text: "Drought-resistant crops that require less water: 🌾 Bajra, 🌾 Jowar, 🥜 Groundnut, 🌱 Sesame. These crops can thrive with minimal water and are perfect for areas with low rainfall.",
+                            actions: ["Bajra farming", "Jowar cultivation", "Drought farming tips"]
+                        };
+                    }
+                    if (lowerMessage.includes('irrigation')) {
+                        return {
+                            text: "Efficient irrigation methods:\n💧 Drip Irrigation: Saves water, targets roots\n💦 Sprinkler: Good for field crops\n🌊 Flood: Traditional but water-intensive\n\nWhich method would you like to know more about?",
+                            actions: ["Drip irrigation guide", "Sprinkler systems", "Water conservation"]
+                        };
+                    }
+                    return {
+                        text: "Water management is crucial for farming. Different crops have different water needs:\n\n💧 High Water: Rice, Sugarcane\n🌊 Medium Water: Wheat, Maize\n🏜️ Low Water: Bajra, Jowar\n\nWould you like specific water management tips?",
+                        actions: ["High water crops", "Low water crops", "Irrigation methods"]
+                    };
+                }
+                
+                // Farming practices
+                if (lowerMessage.includes('fertilizer') || lowerMessage.includes('manure') || lowerMessage.includes('compost') || lowerMessage.includes('nutrient')) {
+                    return {
+                        text: "Organic farming practices for better soil health:\n🌿 Compost: Recycles nutrients\n🌱 Green Manure: Adds nitrogen\n🐄 Farmyard Manure: Rich in nutrients\n🍂 Crop Residue: Maintains soil structure\n\nNeed details on any practice?",
+                        actions: ["Composting guide", "Green manure crops", "Organic farming tips"]
+                    };
+                }
+                
+                if (lowerMessage.includes('pest') || lowerMessage.includes('disease') || lowerMessage.includes('insect')) {
+                    return {
+                        text: "Integrated Pest Management (IPM) strategies:\n🐞 Biological control: Use beneficial insects\n🌿 Neem-based pesticides: Natural and effective\n🔄 Crop rotation: Breaks pest cycles\n🌾 Resistant varieties: Choose pest-resistant crops\n\nWant specific pest control solutions?",
+                        actions: ["Natural pesticides", "Beneficial insects", "Crop rotation benefits"]
+                    };
+                }
+                
+                // Help and support
+                if (lowerMessage.includes('help') || lowerMessage.includes('support') || lowerMessage.includes('how to') || lowerMessage.includes('guide')) {
+                    return {
+                        text: "I'm here to help you with all your farming needs! I can assist you with:\n\n🌱 Crop recommendations based on soil and climate\n🌦️ Weather information for farming planning\n🌿 Soil improvement techniques\n💧 Water management and irrigation\n🐛 Pest and disease control\n📈 Market insights and farming tips\n\nWhat would you like help with today?",
+                        actions: ["Crop recommendations", "Weather forecast", "Soil health", "Pest control"]
+                    };
+                }
+                
+                // Thank you messages
+                if (lowerMessage.includes('thank') || lowerMessage.includes('thanks') || lowerMessage.includes('appreciate')) {
+                    const responses = [
+                        "You're welcome! 🌱 Happy farming! Let me know if you need any more help.",
+                        "My pleasure! Feel free to ask me anything about farming anytime.",
+                        "Glad I could help! Wishing you a bountiful harvest! 🌾"
+                    ];
+                    return {
+                        text: responses[Math.floor(Math.random() * responses.length)],
+                        actions: ["More farming tips", "Weather update", "Crop suggestions"]
+                    };
+                }
+                
+                // Default response
+                const defaultResponses = [
+                    "I'm not sure I understand. Could you please rephrase your question? You can ask me about crop recommendations, weather, soil types, or farming practices.",
+                    "I'd be happy to help! Could you tell me more about what you're looking for? I can assist with crop selection, weather information, soil management, and more.",
+                    "Let me help you better! Are you asking about crop recommendations, weather forecasts, soil types, or farming techniques?"
+                ];
+                
+                return {
+                    text: defaultResponses[Math.floor(Math.random() * defaultResponses.length)],
+                    actions: ["Crop recommendations", "Weather info", "Soil types", "Farming tips"]
+                };
+            }
+        }
+    </script>
+</body>
+</html>
